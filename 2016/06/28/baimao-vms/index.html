@@ -17,7 +17,7 @@
 漏洞UAF">
 <meta property="og:image" content="http://sh3ll.me/images/2016/06/28/vms-1.png">
 <meta property="og:image" content="http://sh3ll.me/images/2016/06/28/vms-2.png">
-<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta property="og:updated_time" content="2016-07-16T11:33:42.984Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="3 个白帽 - VMS">
 <meta name="twitter:description" content="rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。
@@ -108,7 +108,7 @@
 <p>Drops 上的 writeup 也是利用的 __free_hook 这种方式。</p>
 <h4 id="堆指针加密"><a href="#堆指针加密" class="headerlink" title="堆指针加密"></a>堆指针加密</h4><p>作者很“心机”，为了防止直接通过 UAF 修改 DetailAddr 指针，将堆地址异或后放入表/结构体中。如果想要修改指针就必须泄露出异或的 key。</p>
 <h4 id="HeapPointerCheck"><a href="#HeapPointerCheck" class="headerlink" title="HeapPointerCheck"></a>HeapPointerCheck</h4><p>在 Add、Edit、Delete 功能中，程序会首先对堆地址进行 check。这个 check 最终我也没有绕过，看 writeup 上讲是因为 check 不严谨，多次尝试是有一定几率绕过的，糖果师傅也这样说。在 writeup 的评论中作者回复说可以通过将全局变量重写为无穷大进行绕过，但是我并没有想到办法去重写。</p>
-<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h4 id="x64-下-fastbins-的大小限制是？"><a href="#x64-下-fastbins-的大小限制是？" class="headerlink" title="x64 下 fastbins 的大小限制是？"></a>x64 下 fastbins 的大小限制是？</h4><p>这道题目最开始时我完全没有想到 fastbin，因为 Vuln 的结构体是 104，按照市面上大部分文章所讲，fastbin 的大小限制因该是 16-64，它是不属于其中的。但是实际调试过程中发现这个大小是与系统位数有关的，x64 下相应的限制应该是 32-128。</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h4 id="x64-下-fastbins-的大小限制是？"><a href="#x64-下-fastbins-的大小限制是？" class="headerlink" title="x64 下 fastbins 的大小限制是？"></a>x64 下 fastbins 的大小限制是？</h4><p>这道题目最开始时我完全没有想到 fastbin，因为 Vuln 的结构体是 104，按照市面上大部分文章所讲，fastbin 的大小限制应该是 16-64，它是不属于其中的。但是实际调试过程中发现这个大小是与系统位数有关的，x64 下相应的限制应该是 32-128。</p>
 <h4 id="fastbins-真的不合并？"><a href="#fastbins-真的不合并？" class="headerlink" title="fastbins 真的不合并？"></a>fastbins 真的不合并？</h4><p>在写 exp 的过程中遇到了一个问题：泄露堆地址时如果先删除 Vuln0 再删除 Vuln1，会导致 fastbins 中的 chunk 合并，但是同样的在目前大家写的文章中都是说 fastbins 是不合并的。深究下发现了这篇文章：<a href="http://blog.chinaunix.net/uid-27767798-id-4107020.html" target="_blank" rel="external">ptmalloc中的fastbin chunk的合并过程</a> 解决了我的疑惑。这道题目中的情景是系统在 free 的 chunk 如果与 top chunk 相邻，那么当它与 top chunk 合并时系统回去尝试合并 fastbin 中的 chunk，减少碎片化。</p>
 <h2 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h2><p>直接贴 EXP 出来吧，思路通了结合注释还是比较容易理解的：<a href="https://gist.github.com/chuhades/73b1237c1429f384f980d7bb0328fa9c" target="_blank" rel="external">https://gist.github.com/chuhades/73b1237c1429f384f980d7bb0328fa9c</a><br>其实基本与 Drops 上面是一样的 :D</p>
 <h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>

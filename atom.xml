@@ -50,7 +50,7 @@
     <link href="http://sh3ll.me/2016/06/28/baimao-vms/"/>
     <id>http://sh3ll.me/2016/06/28/baimao-vms/</id>
     <published>2016-06-28T08:29:41.000Z</published>
-    <updated>2016-07-16T09:12:50.038Z</updated>
+    <updated>2016-07-16T11:33:42.984Z</updated>
     
     <content type="html">&lt;p&gt;rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。&lt;/p&gt;
 &lt;h2 id=&quot;逆向&quot;&gt;&lt;a href=&quot;#逆向&quot; class=&quot;headerlink&quot; title=&quot;逆向&quot;&gt;&lt;/a&gt;逆向&lt;/h2&gt;&lt;p&gt;程序相对简单，逆向中碰到的唯一略微难理解的地方可能就是堆指针的加密，这个在我以前做过的题目中是没有遇到过的。&lt;/p&gt;
@@ -69,7 +69,7 @@
 &lt;p&gt;Drops 上的 writeup 也是利用的 __free_hook 这种方式。&lt;/p&gt;
 &lt;h4 id=&quot;堆指针加密&quot;&gt;&lt;a href=&quot;#堆指针加密&quot; class=&quot;headerlink&quot; title=&quot;堆指针加密&quot;&gt;&lt;/a&gt;堆指针加密&lt;/h4&gt;&lt;p&gt;作者很“心机”，为了防止直接通过 UAF 修改 DetailAddr 指针，将堆地址异或后放入表/结构体中。如果想要修改指针就必须泄露出异或的 key。&lt;/p&gt;
 &lt;h4 id=&quot;HeapPointerCheck&quot;&gt;&lt;a href=&quot;#HeapPointerCheck&quot; class=&quot;headerlink&quot; title=&quot;HeapPointerCheck&quot;&gt;&lt;/a&gt;HeapPointerCheck&lt;/h4&gt;&lt;p&gt;在 Add、Edit、Delete 功能中，程序会首先对堆地址进行 check。这个 check 最终我也没有绕过，看 writeup 上讲是因为 check 不严谨，多次尝试是有一定几率绕过的，糖果师傅也这样说。在 writeup 的评论中作者回复说可以通过将全局变量重写为无穷大进行绕过，但是我并没有想到办法去重写。&lt;/p&gt;
-&lt;h2 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h2&gt;&lt;h4 id=&quot;x64-下-fastbins-的大小限制是？&quot;&gt;&lt;a href=&quot;#x64-下-fastbins-的大小限制是？&quot; class=&quot;headerlink&quot; title=&quot;x64 下 fastbins 的大小限制是？&quot;&gt;&lt;/a&gt;x64 下 fastbins 的大小限制是？&lt;/h4&gt;&lt;p&gt;这道题目最开始时我完全没有想到 fastbin，因为 Vuln 的结构体是 104，按照市面上大部分文章所讲，fastbin 的大小限制因该是 16-64，它是不属于其中的。但是实际调试过程中发现这个大小是与系统位数有关的，x64 下相应的限制应该是 32-128。&lt;/p&gt;
+&lt;h2 id=&quot;问题&quot;&gt;&lt;a href=&quot;#问题&quot; class=&quot;headerlink&quot; title=&quot;问题&quot;&gt;&lt;/a&gt;问题&lt;/h2&gt;&lt;h4 id=&quot;x64-下-fastbins-的大小限制是？&quot;&gt;&lt;a href=&quot;#x64-下-fastbins-的大小限制是？&quot; class=&quot;headerlink&quot; title=&quot;x64 下 fastbins 的大小限制是？&quot;&gt;&lt;/a&gt;x64 下 fastbins 的大小限制是？&lt;/h4&gt;&lt;p&gt;这道题目最开始时我完全没有想到 fastbin，因为 Vuln 的结构体是 104，按照市面上大部分文章所讲，fastbin 的大小限制应该是 16-64，它是不属于其中的。但是实际调试过程中发现这个大小是与系统位数有关的，x64 下相应的限制应该是 32-128。&lt;/p&gt;
 &lt;h4 id=&quot;fastbins-真的不合并？&quot;&gt;&lt;a href=&quot;#fastbins-真的不合并？&quot; class=&quot;headerlink&quot; title=&quot;fastbins 真的不合并？&quot;&gt;&lt;/a&gt;fastbins 真的不合并？&lt;/h4&gt;&lt;p&gt;在写 exp 的过程中遇到了一个问题：泄露堆地址时如果先删除 Vuln0 再删除 Vuln1，会导致 fastbins 中的 chunk 合并，但是同样的在目前大家写的文章中都是说 fastbins 是不合并的。深究下发现了这篇文章：&lt;a href=&quot;http://blog.chinaunix.net/uid-27767798-id-4107020.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;ptmalloc中的fastbin chunk的合并过程&lt;/a&gt; 解决了我的疑惑。这道题目中的情景是系统在 free 的 chunk 如果与 top chunk 相邻，那么当它与 top chunk 合并时系统回去尝试合并 fastbin 中的 chunk，减少碎片化。&lt;/p&gt;
 &lt;h2 id=&quot;利用&quot;&gt;&lt;a href=&quot;#利用&quot; class=&quot;headerlink&quot; title=&quot;利用&quot;&gt;&lt;/a&gt;利用&lt;/h2&gt;&lt;p&gt;直接贴 EXP 出来吧，思路通了结合注释还是比较容易理解的：&lt;a href=&quot;https://gist.github.com/chuhades/73b1237c1429f384f980d7bb0328fa9c&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://gist.github.com/chuhades/73b1237c1429f384f980d7bb0328fa9c&lt;/a&gt;&lt;br&gt;其实基本与 Drops 上面是一样的 :D&lt;/p&gt;
 &lt;h2 id=&quot;References&quot;&gt;&lt;a href=&quot;#References&quot; class=&quot;headerlink&quot; title=&quot;References&quot;&gt;&lt;/a&gt;References&lt;/h2&gt;&lt;ul&gt;

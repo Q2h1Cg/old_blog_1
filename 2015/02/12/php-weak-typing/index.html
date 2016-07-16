@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>PHP 弱类型带来的安全问题 | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前一段看到的一个 TIP，实践了下，有所收获。
+强制转换规则">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PHP 弱类型带来的安全问题">
+<meta property="og:url" content="http://sh3ll.me/2015/02/12/php-weak-typing/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="前一段看到的一个 TIP，实践了下，有所收获。
+强制转换规则">
+<meta property="og:image" content="http://sh3ll.me/images/2015/02/12/php-weak-typing-1.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PHP 弱类型带来的安全问题">
+<meta name="twitter:description" content="前一段看到的一个 TIP，实践了下，有所收获。
+强制转换规则">
+<meta name="twitter:image" content="http://sh3ll.me/images/2015/02/12/php-weak-typing-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-php-weak-typing" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PHP 弱类型带来的安全问题
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2015-02-12T11:00:26.000Z" itemprop="datePublished">02-12-2015</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>前一段看到的一个 TIP，实践了下，有所收获。</p>
+<h2 id="强制转换规则"><a href="#强制转换规则" class="headerlink" title="强制转换规则"></a>强制转换规则</h2><p><img src="/images/2015/02/12/php-weak-typing-1.png" alt="图 1"><a id="more"></a></p>
+<h2 id="字符串转换为数值"><a href="#字符串转换为数值" class="headerlink" title="字符串转换为数值"></a>字符串转换为数值</h2><p>由上图可以看出，当对两个字符串进行比较时，会『进行数字或词汇比较』。</p>
+<blockquote>
+<p>当一个字符串被当作一个数值来取值，其结果和类型如下：<br>如果该字符串没有包含 ‘.’，’e’ 或 ‘E’ 并且其数字值在整型的范围之内（由 PHP_INT_MAX 所定义），该字符串将被当成 integer 来取值。其它所有情况下都被作为 float 来取值。<br>该字符串的开始部分决定了它的值。如果该字符串以合法的数值开始，则使用该数值。否则其值为 0（零）。合法数值由可选的正负号，后面跟着一个或多个数字（可能有小数点），再跟着可选的指数部分。指数部分由 ‘e’ 或 ‘E’ 后面跟着一个或多个数字构成。</p>
+</blockquote>
+<p>再结合文档，可以得出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    var_dump(&apos;1024&apos; == &apos;1024.00&apos;); //bool(true)</div><div class="line">?&gt;</div></pre></td></tr></table></figure>
+<h2 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h2><p>微博上看到安全宝发起的 <a href="http://yuebaomei.com" target="_blank" rel="external">yuebaomei</a>，最终关中代码审计运用到了以上 TIP。漏洞代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">&lt;?php </div><div class="line">$flag = &quot;THIS IS FLAG&quot;; </div><div class="line"></div><div class="line">if  (&quot;POST&quot; == $_SERVER[&apos;REQUEST_METHOD&apos;]) </div><div class="line">&#123; </div><div class="line">$password = $_POST[&apos;password&apos;]; </div><div class="line">if (0 &gt;= preg_match(&apos;/^[[:graph:]]&#123;12,&#125;$/&apos;, $password))</div><div class="line">&#123; </div><div class="line">echo &apos;Wrong Format&apos;; </div><div class="line">exit; </div><div class="line">&#125; </div><div class="line"></div><div class="line">while (TRUE) </div><div class="line">&#123;</div><div class="line">$reg = &apos;/([[:punct:]]+|[[:digit:]]+|[[:upper:]]+|[[:lower:]]+)/&apos;; </div><div class="line">if (6 &gt; preg_match_all($reg, $password, $arr)) </div><div class="line">break; </div><div class="line"></div><div class="line">$c = 0; </div><div class="line">$ps = array(&apos;punct&apos;, &apos;digit&apos;, &apos;upper&apos;, &apos;lower&apos;); </div><div class="line">foreach ($ps as $pt) </div><div class="line">&#123;</div><div class="line">if (preg_match(&quot;/[[:$pt:]]+/&quot;, $password))</div><div class="line">$c += 1;</div><div class="line">&#125; </div><div class="line"></div><div class="line">if ($c &lt; 3) break; </div><div class="line">if (&quot;42&quot; == $password) echo $flag; </div><div class="line">else echo &apos;Wrong password&apos;; </div><div class="line">exit;</div><div class="line">&#125;</div><div class="line">&#125;</div><div class="line">?&gt;</div></pre></td></tr></table></figure>
+<p>上面的部分是一些对密码强度的验证，读懂代码后可以简单通过。最后的验证在于：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">if (&quot;42&quot; == $password) echo $flag;</div></pre></td></tr></table></figure>
+<p>依照上述思路，令 $password 为 420000000.0e-7 便可通过验证，得到 flag。</p>
+<h2 id="References-amp-Recommendation"><a href="#References-amp-Recommendation" class="headerlink" title="References &amp; Recommendation"></a>References &amp; Recommendation</h2><p><a href="http://drops.wooyun.org/tips/4483" target="_blank" rel="external">浅谈PHP弱类型安全</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2015/02/12/php-weak-typing/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/03/22/python-event-handler/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Python 实现事件监听
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/12/06/stack-overflow/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">栈溢出学习</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2015/02/12/php-weak-typing/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

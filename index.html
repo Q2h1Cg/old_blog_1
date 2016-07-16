@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Chu&apos;s BLoG - Talk is cheap, show me the shell.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Chu's BLoG">
+<meta property="og:url" content="http://sh3ll.me/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="Chu&apos;s BLoG - Talk is cheap, show me the shell.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Chu's BLoG">
+<meta name="twitter:description" content="Chu&apos;s BLoG - Talk is cheap, show me the shell.">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-ichunqiu-tenCentAp" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2016/07/04/ichunqiu-tenCentAp/">ichunqiu tenCentAp - Pwn</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-07-04T04:56:24.000Z" itemprop="datePublished">07-04-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>第一次自己做 Pwn，真刺激。bin 和 idb：<a href="/images/2016/07/04/ichunqiu.7z">http://sh3ll.me/images/2016/07/04/ichunqiu.7z</a></p>
+<h2 id="Pwn1"><a href="#Pwn1" class="headerlink" title="Pwn1"></a>Pwn1</h2><p>在输入操作下标时没有检测是否越界，通过数组越界读获取获取伪造的函数指针执行 shellcode。<br><img src="/images/2016/07/04/ichunqiu-1.png" alt="图 1">
+        
+          <p class="article-more-link">
+            <a href="/2016/07/04/ichunqiu-tenCentAp/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/07/04/ichunqiu-tenCentAp/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-baimao-vms" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2016/06/28/baimao-vms/">3 个白帽 - VMS</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-06-28T08:29:41.000Z" itemprop="datePublished">06-28-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。</p>
+<h2 id="逆向"><a href="#逆向" class="headerlink" title="逆向"></a>逆向</h2><p>程序相对简单，逆向中碰到的唯一略微难理解的地方可能就是堆指针的加密，这个在我以前做过的题目中是没有遇到过的。</p>
+<h2 id="漏洞"><a href="#漏洞" class="headerlink" title="漏洞"></a>漏洞</h2><h4 id="UAF"><a href="#UAF" class="headerlink" title="UAF"></a>UAF</h4><p>
+        
+          <p class="article-more-link">
+            <a href="/2016/06/28/baimao-vms/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/06/28/baimao-vms/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-review-pepper" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2016/05/15/review-pepper/">[Review]ISG 2014 Final Pepper</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-05-15T09:12:45.000Z" itemprop="datePublished">05-15-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ISG 2014 决赛上的一道题目，捡起来练练手。</p>
+<h2 id="逆向分析"><a href="#逆向分析" class="headerlink" title="逆向分析"></a>逆向分析</h2><p>逆向一直是我的弱点，经验不足，过度依赖 F5，总体感觉还是汇编能力太弱了 ：（<br>我的 idb 文件在这里：<a href="/images/2016/05/15/pepper.idb">点击下载</a>
+        
+          <p class="article-more-link">
+            <a href="/2016/05/15/review-pepper/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/05/15/review-pepper/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-shit" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2016/04/13/shit/">最近的一些吐嘈</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-04-13T04:57:30.000Z" itemprop="datePublished">04-13-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Life/">Life</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>CTF 决赛现在也都开始找外援了么，什么时候开始这个圈子已经这样了？线上赛解不出，问问我还可以理解，什么时候决赛也开始这样了。打个比赛就是为了那点奖金么？为了打比赛而打比赛？不去了解是真的不知道有多脏。</p>
+<p>信安真的是『火』了，什么人都想插一脚。我们原本一个小协会只是想安静的做技术，在学校维护一个自己的圈子，现在到头来还要搞死我们？明面上说是为了我们好，实际想彻底栓住我，算盘打得也是响亮。这池水被搅的太浑了，社会人的做事真不是一群学生能抗衡的。</p>
+<p>草你们妈的。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/04/13/shit/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-learn-nodejs-portscan" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2016/04/06/learn-nodejs-portscan/">Learn Node.js</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-04-06T07:26:46.000Z" itemprop="datePublished">04-06-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Program/">Program</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这两天过了下《深入浅出Node.js》，记录下自己的理解。</p>
+<h2 id="PortScan"><a href="#PortScan" class="headerlink" title="PortScan"></a>PortScan</h2><p>每次看一门语言都会去写个端口扫描器，其中可以学的到很多：模块编写/导入、网络 IO、并发控制、文件读写、命令行交互…<br>Node.js 版本的在：<a href="https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6">https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6</a></p>
+<h2 id="Node-js-的优劣"><a href="#Node-js-的优劣" class="headerlink" title="Node.js 的优劣"></a>Node.js 的优劣</h2>
+        
+          <p class="article-more-link">
+            <a href="/2016/04/06/learn-nodejs-portscan/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/04/06/learn-nodejs-portscan/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-pwnable-kr-writeup" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2016/03/28/pwnable-kr-writeup/">Pwnable.kr</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-03-28T12:06:52.000Z" itemprop="datePublished">03-28-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>和糖果师傅学 Linux Exploit，发现 pwnable.kr 上面的题目很有趣，边学边做。</p>
+<h2 id="1-fd"><a href="#1-fd" class="headerlink" title="1. fd"></a>1. fd</h2><p>考察的是 Linux 文件描述符相关知识：
+        
+          <p class="article-more-link">
+            <a href="/2016/03/28/pwnable-kr-writeup/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/03/28/pwnable-kr-writeup/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-nsctf-bin-1500" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2015/09/28/nsctf-bin-1500/">NSCTF Bin 1500</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2015-09-28T07:30:58.000Z" itemprop="datePublished">09-28-2015</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>实战中体验了次 DEP &amp; ASLR 的绕过。</p>
+<h2 id="Fuzz-溢出点"><a href="#Fuzz-溢出点" class="headerlink" title="Fuzz 溢出点"></a>Fuzz 溢出点</h2><p>题目里只给了个 PE 程序，运行程序后 <code>netstat -anbp tcp</code> 可以看到程序正在监听 2994 端口。PEiD 查看发现是 AsPack 的壳，<code>ESP 定律</code> 脱壳后丢到 IDA 中搜索欢迎信息（<code>shift F12</code>），F5 得到如下伪代码：
+        
+          <p class="article-more-link">
+            <a href="/2015/09/28/nsctf-bin-1500/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2015/09/28/nsctf-bin-1500/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-CVE-2012-0158" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <a class="article-title" href="/2015/09/19/CVE-2012-0158/">CVE-2012-0158 漏洞分析</a>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2015-09-19T02:33:52.000Z" itemprop="datePublished">09-19-2015</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这个漏洞分析了几天才搞懂，实战与做实验区别还是很大的。</p>
+<h2 id="漏洞概要"><a href="#漏洞概要" class="headerlink" title="漏洞概要"></a>漏洞概要</h2><p>此漏洞是一个栈溢出漏洞，是由于 Microsoft Windows Common Controls 的 MSCOMCTL.TreeView、MSCOMCTL.ListView2、MSCOMCTL.TreeView2、MSCOMCTL.ListView 控件（MSCOMCTL.OCX）中存在错误，可被利用破坏内存，导致任意代码执行。
+        
+          <p class="article-more-link">
+            <a href="/2015/09/19/CVE-2012-0158/#more">Read More</a>
+          </p>
+        
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2015/09/19/CVE-2012-0158/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
+  
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/count.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

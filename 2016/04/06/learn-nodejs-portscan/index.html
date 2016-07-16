@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Learn Node.js | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="这两天过了下《深入浅出Node.js》，记录下自己的理解。
+PortScan每次看一门语言都会去写个端口扫描器，其中可以学的到很多：模块编写/导入、网络 IO、并发控制、文件读写、命令行交互…Node.js 版本的在：https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6
+Node.js 的优劣">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Learn Node.js">
+<meta property="og:url" content="http://sh3ll.me/2016/04/06/learn-nodejs-portscan/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="这两天过了下《深入浅出Node.js》，记录下自己的理解。
+PortScan每次看一门语言都会去写个端口扫描器，其中可以学的到很多：模块编写/导入、网络 IO、并发控制、文件读写、命令行交互…Node.js 版本的在：https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6
+Node.js 的优劣">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Learn Node.js">
+<meta name="twitter:description" content="这两天过了下《深入浅出Node.js》，记录下自己的理解。
+PortScan每次看一门语言都会去写个端口扫描器，其中可以学的到很多：模块编写/导入、网络 IO、并发控制、文件读写、命令行交互…Node.js 版本的在：https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6
+Node.js 的优劣">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-learn-nodejs-portscan" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Learn Node.js
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-04-06T07:26:46.000Z" itemprop="datePublished">04-06-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Program/">Program</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这两天过了下《深入浅出Node.js》，记录下自己的理解。</p>
+<h2 id="PortScan"><a href="#PortScan" class="headerlink" title="PortScan"></a>PortScan</h2><p>每次看一门语言都会去写个端口扫描器，其中可以学的到很多：模块编写/导入、网络 IO、并发控制、文件读写、命令行交互…<br>Node.js 版本的在：<a href="https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6" target="_blank" rel="external">https://gist.github.com/chuhades/bceb5a9d27ac7056081ea90639855cf6</a></p>
+<h2 id="Node-js-的优劣"><a href="#Node-js-的优劣" class="headerlink" title="Node.js 的优劣"></a>Node.js 的优劣</h2><a id="more"></a>
+<h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>事件驱动</li>
+<li>原生异步</li>
+<li>分布式</li>
+<li>生态圈繁荣</li>
+</ul>
+<p>因为这些优点，可以说 Node.js 就是为网络而生。借助 <code>events.EventEmitter</code> 可以很简单的实现事件驱动，用来做扫描器效果应该很好；）<br>npm 的存在使 Node.js 的生态圈极其繁荣，各种 package 都很齐全，开发者只需要 require; require ~</p>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><p>异步也带来了相应的缺点：callback hell。不过可以通过 <code>Promise/Deferred</code> 模式解决，PortScan 中我使用了 <code>q</code> 来做 Promise。</p>
+<p>所以 Node.js 的典型应用场景：I/O 密集型；分布式应用。<br>至于计算任务可以通过 C++ 编写 module 解决。</p>
+<h2 id="可能的安全点"><a href="#可能的安全点" class="headerlink" title="可能的安全点"></a>可能的安全点</h2><p>除了常规问题，个人感觉可能出现问题的点如下：</p>
+<ul>
+<li>fake package</li>
+</ul>
+<p>Node.js 对应第三方包的导入流程如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">console.log(module.paths);</div><div class="line"></div><div class="line">// output</div><div class="line">[ </div><div class="line">  &apos;/home/chu/Codz/learn_node/node_modules&apos;,</div><div class="line">  &apos;/home/chu/Codz/node_modules&apos;,</div><div class="line">  &apos;/home/chu/node_modules&apos;,</div><div class="line">  &apos;/home/node_modules&apos;,</div><div class="line">  &apos;/node_modules&apos; </div><div class="line">]</div></pre></td></tr></table></figure>
+<p>如果当前目录没有相应包，则自动去上级目录寻找，并且优先级高于全局包。这可能会带来相应的安全点：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">⋊&gt; ~/C/learn_node ls node_modules/                                                                        18:15:39</div><div class="line">bagpipe/  commander/  netmask/  q-io/</div><div class="line">⋊&gt; ~/C/learn_node ls ../node_modules/                                                                     18:20:44</div><div class="line">q/</div><div class="line">⋊&gt; ~/C/learn_node cat test.js                                                                             18:20:47</div><div class="line">/**</div><div class="line"> * Created by chu on 16-4-6.</div><div class="line"> */</div><div class="line"></div><div class="line">var Q = require(&quot;q&quot;);</div><div class="line">⋊&gt; ~/C/learn_node node test.js                                                                            18:20:51</div><div class="line">faked package</div><div class="line"></div><div class="line">// fake global</div><div class="line">// 全局安装了 async</div><div class="line">⋊&gt; ~/C/learn_node ls node_modules/                                                                                                                                                                                            19:10:44</div><div class="line">async/  bagpipe/  commander/  netmask/  q-io/</div><div class="line">⋊&gt; ~/C/learn_node cat test.js                                                                                                                                                                                                 19:10:45</div><div class="line">/**</div><div class="line"> * Created by chu on 16-4-6.</div><div class="line"> */</div><div class="line"></div><div class="line">var async = require(&quot;async&quot;);                                                                                                                                                                                                       </div><div class="line">⋊&gt; ~/C/learn_node node test.js                                                                                                                                                                                                19:10:47</div><div class="line">faked package async</div></pre></td></tr></table></figure>
+<p>可以用来留后门；）</p>
+<ul>
+<li>npm 审核不严</li>
+</ul>
+<p>npm 对用户提交缺乏审查机制，如果提交一个和知名包名字相近的包（Netmask -&gt; netmask），用户错误输入就会导致安装恶意的包。造成代码执行。实例可以参考下：<a href="http://www.cnblogs.com/index-html/p/npm_package_phishing.html" target="_blank" rel="external">【社工】NodeJS 应用仓库钓鱼</a></p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li>《深入浅出Node.js》</li>
+<li><a href="http://www.cnblogs.com/index-html/p/npm_package_phishing.html" target="_blank" rel="external">【社工】NodeJS 应用仓库钓鱼</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/04/06/learn-nodejs-portscan/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/13/shit/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          最近的一些吐嘈
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/28/pwnable-kr-writeup/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Pwnable.kr</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2016/04/06/learn-nodejs-portscan/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

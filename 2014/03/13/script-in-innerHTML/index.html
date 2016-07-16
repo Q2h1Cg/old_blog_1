@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>innerHTML 中script 的加载与执行 | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="今天在检测渣浪 weibo 子域的时候，有一个 xss 困扰了半天。输出点是 dom 处理的，可以直接插入标签。插入 &amp;lt;iframe/onload=alert(1)&amp;gt; 可以执行，但是直接插 入 &amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt; 却不可以。纠结了一会，google 到这篇文章: http://wybai.1kapp.com/?p=14
+原来是 i">
+<meta property="og:type" content="article">
+<meta property="og:title" content="innerHTML 中script 的加载与执行">
+<meta property="og:url" content="http://sh3ll.me/2014/03/13/script-in-innerHTML/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="今天在检测渣浪 weibo 子域的时候，有一个 xss 困扰了半天。输出点是 dom 处理的，可以直接插入标签。插入 &amp;lt;iframe/onload=alert(1)&amp;gt; 可以执行，但是直接插 入 &amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt; 却不可以。纠结了一会，google 到这篇文章: http://wybai.1kapp.com/?p=14
+原来是 i">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="innerHTML 中script 的加载与执行">
+<meta name="twitter:description" content="今天在检测渣浪 weibo 子域的时候，有一个 xss 困扰了半天。输出点是 dom 处理的，可以直接插入标签。插入 &amp;lt;iframe/onload=alert(1)&amp;gt; 可以执行，但是直接插 入 &amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt; 却不可以。纠结了一会，google 到这篇文章: http://wybai.1kapp.com/?p=14
+原来是 i">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-script-in-innerHTML" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      innerHTML 中script 的加载与执行
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-03-13T02:41:12.000Z" itemprop="datePublished">03-13-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>今天在检测渣浪 weibo 子域的时候，有一个 xss 困扰了半天。<br>输出点是 dom 处理的，可以直接插入标签。插入 <code>&lt;iframe/onload=alert(1)&gt;</code> 可以执行，但是直接插 入 <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> 却不可以。<br>纠结了一会，google 到这篇文章: <a href="http://wybai.1kapp.com/?p=14" target="_blank" rel="external">http://wybai.1kapp.com/?p=14</a></p>
+<p>原来是 innerHTML 的原因，学习了…</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/03/13/script-in-innerHTML/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/03/13/div-phishing/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          记一次div 层钓鱼
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/03/13/a-simple-flash-xss/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">简单分析个 flash xss</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/03/13/script-in-innerHTML/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

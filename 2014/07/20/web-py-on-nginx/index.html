@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Nginx 部署 Web.py | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="需要的包spawn-fcgiflup
+Nginx 配置文件">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nginx 部署 Web.py">
+<meta property="og:url" content="http://sh3ll.me/2014/07/20/web-py-on-nginx/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="需要的包spawn-fcgiflup
+Nginx 配置文件">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Nginx 部署 Web.py">
+<meta name="twitter:description" content="需要的包spawn-fcgiflup
+Nginx 配置文件">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-web-py-on-nginx" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Nginx 部署 Web.py
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-07-20T12:03:31.000Z" itemprop="datePublished">07-20-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Program/">Program</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="需要的包"><a href="#需要的包" class="headerlink" title="需要的包"></a>需要的包</h2><p>spawn-fcgi<br>flup</p>
+<h2 id="Nginx-配置文件"><a href="#Nginx-配置文件" class="headerlink" title="Nginx 配置文件"></a>Nginx 配置文件</h2><a id="more"></a><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">server</div><div class="line">    &#123;</div><div class="line">        listen 80;</div><div class="line">        server_name t.sh3ll.me;</div><div class="line">        root /home/wwwroot/web.py;</div><div class="line"></div><div class="line">        location /</div><div class="line">        &#123;</div><div class="line">                include fastcgi_params;</div><div class="line">                fastcgi_param SCRIPT_FILENAME $fastcgi_script_name;</div><div class="line">                fastcgi_param PATH_INFO $fastcgi_script_name;</div><div class="line">                    fastcgi_pass unix:/tmp/pyweb.sock;</div><div class="line">                    fastcgi_param SERVER_ADDR $server_addr;</div><div class="line">                    fastcgi_param SERVER_PORT $server_port;</div><div class="line">                    fastcgi_param SERVER_NAME $server_name;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        location /static/</div><div class="line">        &#123;</div><div class="line">                if (-f $request_filename)</div><div class="line">            &#123;</div><div class="line">                    rewrite ^/static/(.*)$  /static/$1 break;</div><div class="line">                expires 10d;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        access_log  /home/wwwlogs/web.py.log  access;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h2 id="Spawn-fcgi"><a href="#Spawn-fcgi" class="headerlink" title="Spawn-fcgi"></a>Spawn-fcgi</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">root@localhost:~# cat startSpawn</div><div class="line">#!/bin/bash</div><div class="line"></div><div class="line">spawn-fcgi -d /home/wwwroot/web.py/ -f /home/wwwroot/web.py/main.py  -s /tmp/pyweb.sock -u www -g www</div><div class="line">root@localhost:~# cat stopSpawn</div><div class="line">#!/bin/bash</div><div class="line"></div><div class="line">kill `pgrep -f &quot;python /home/wwwroot/web.py/main.py&quot;`</div></pre></td></tr></table></figure>
+<h2 id="Hello-world"><a href="#Hello-world" class="headerlink" title="Hello, world!"></a>Hello, world!</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">#!/usr/bin/env python</div><div class="line"># -*- coding: utf-8 -*-</div><div class="line"></div><div class="line">import web</div><div class="line"></div><div class="line">urls = (&quot;/.*&quot;, &quot;hello&quot;)</div><div class="line">app = web.application(urls, globals())</div><div class="line"></div><div class="line">class hello:</div><div class="line">    def GET(self):</div><div class="line">        return &apos;Hello, world!&apos;</div><div class="line"></div><div class="line">if __name__ == &quot;__main__&quot;:</div><div class="line">    web.wsgi.runwsgi = lambda func, addr=None: web.wsgi.runfcgi(func, addr) #此行必须有</div><div class="line">    app.run()</div></pre></td></tr></table></figure>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">root@localhost:~# ./lnmp start</div><div class="line">=========================================================================</div><div class="line">Manager for LNMP V1.1  ,  Written by Licess</div><div class="line">=========================================================================</div><div class="line">LNMP is a tool to auto-compile &amp; install Nginx+MySQL+PHP on Linux</div><div class="line">This script is a tool to Manage status of lnmp</div><div class="line">For more information please visit http://www.lnmp.org</div><div class="line"></div><div class="line">Usage: /root/lnmp &#123;start|stop|reload|restart|kill|status&#125;</div><div class="line">=========================================================================</div><div class="line">Starting LNMP...</div><div class="line">Starting nginx...  done</div><div class="line">Starting php-fpm  done</div><div class="line">Starting MySQL</div><div class="line">.. *</div><div class="line">root@localhost:~# ./startSpawn</div><div class="line">spawn-fcgi: child spawned successfully: PID: 3370</div></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/07/20/web-py-on-nginx/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/08/13/python-with-yield/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Python with &amp; yield
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/07/02/discuz-flash-csrf-to-xss/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Discuz! Flash CSRF To Stored XSS</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/07/20/web-py-on-nginx/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

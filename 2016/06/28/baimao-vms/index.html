@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>3 个白帽 - VMS | Chu&#39;s BLoG</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。
+逆向程序相对简单，逆向中碰到的唯一略微难理解的地方可能就是堆指针的加密，这个在我以前做过的题目中是没有遇到过的。
+漏洞UAF">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3 个白帽 - VMS">
+<meta property="og:url" content="http://sh3ll.me/2016/06/28/baimao-vms/index.html">
+<meta property="og:site_name" content="Chu's BLoG">
+<meta property="og:description" content="rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。
+逆向程序相对简单，逆向中碰到的唯一略微难理解的地方可能就是堆指针的加密，这个在我以前做过的题目中是没有遇到过的。
+漏洞UAF">
+<meta property="og:image" content="http://sh3ll.me/images/2016/06/28/vms-1.png">
+<meta property="og:image" content="http://sh3ll.me/images/2016/06/28/vms-2.png">
+<meta property="og:updated_time" content="2016-07-16T09:12:50.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="3 个白帽 - VMS">
+<meta name="twitter:description" content="rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。
+逆向程序相对简单，逆向中碰到的唯一略微难理解的地方可能就是堆指针的加密，这个在我以前做过的题目中是没有遇到过的。
+漏洞UAF">
+<meta name="twitter:image" content="http://sh3ll.me/images/2016/06/28/vms-1.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Chu&#39;s BLoG" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.ico">
+  
+  <link href="http://fonts.useso.com/css?family=Ubuntu" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css">
+  
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Chu&#39;s BLoG</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">Talk is cheap, show me the shell.</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="sub-nav">
+        
+          <a id="nav-home-icon" class="nav-icon" href="/"></a>
+        
+          <a id="nav-archives-icon" class="nav-icon" href="/archives"></a>
+        
+          <a id="nav-about-icon" class="nav-icon" href="/about"></a>
+        
+          <a id="nav-links-icon" class="nav-icon" href="/links"></a>
+        
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+      </nav>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-baimao-vms" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      3 个白帽 - VMS
+    </h1>
+  
+
+      </header>
+    
+    <time class="article-date" datetime="2016-06-28T08:29:41.000Z" itemprop="datePublished">06-28-2016</time>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Exploit/">Exploit</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>rss 里面落下好多文章没有看，看到这道题的时候已经过去了近一个月 :(。来来回回搞了一个星期，真是菜。</p>
+<h2 id="逆向"><a href="#逆向" class="headerlink" title="逆向"></a>逆向</h2><p>程序相对简单，逆向中碰到的唯一略微难理解的地方可能就是堆指针的加密，这个在我以前做过的题目中是没有遇到过的。</p>
+<h2 id="漏洞"><a href="#漏洞" class="headerlink" title="漏洞"></a>漏洞</h2><h4 id="UAF"><a href="#UAF" class="headerlink" title="UAF"></a>UAF</h4><p><a id="more"></a>这个 UAF 很容易就能看出来，程序在 Edit 漏洞信息时，没有判断漏洞是否在使用中，只是根据漏洞名称进行遍历，导致可以修改已经删除漏洞的 Rank、Detail。<br><img src="/images/2016/06/28/vms-1.png" alt="图 1"></p>
+<h4 id="信息泄露"><a href="#信息泄露" class="headerlink" title="信息泄露"></a>信息泄露</h4><p>程序中编写了函数 StdRead，为从 STDIN 中读到的数据后添加 “\x00”，导致没有办法通过 read 来进行信息泄露。但是程序中在 Add 和 Edit 时，如果 Rank 不大于 0，则不会去设置它。结合 fastbins 的特性，可以用来泄露堆地址。<br><img src="/images/2016/06/28/vms-2.png" alt="图 2"><br>（这个点感觉真的很隐晦，我自己看的时候完全没有注意到，看了 Drops 中的 writeup 才了解到的，看来还是不够细心。）</p>
+<h2 id="防护措施"><a href="#防护措施" class="headerlink" title="防护措施"></a>防护措施</h2><p>为了增大漏洞利用的难度，出题者开启了一些安全措施并自己编写了 Check 函数。</p>
+<h4 id="FULL-RELRO"><a href="#FULL-RELRO" class="headerlink" title="FULL RELRO"></a>FULL RELRO</h4><p>checksec 可以看到程序开了 RELRO，以前没有接触过这个防护措施，Google 了下发现主要的影响是 got 表只读。</p>
+<blockquote>
+<p>On current Linux, your binaries are often compiled with RELRO. So that mean that following sections are mapped as read-only:<br>.ctors .dtors .jcr .dynamic .got</p>
+</blockquote>
+<p>这个 UAF 漏洞最后能达到的效果是任意地址写，如果 got 只读对利用会有很大影响。继续 Google，找到了两个绕过的方式：</p>
+<ul>
+<li>fini()</li>
+<li>__free_hook()</li>
+</ul>
+<p>Drops 上的 writeup 也是利用的 __free_hook 这种方式。</p>
+<h4 id="堆指针加密"><a href="#堆指针加密" class="headerlink" title="堆指针加密"></a>堆指针加密</h4><p>作者很“心机”，为了防止直接通过 UAF 修改 DetailAddr 指针，将堆地址异或后放入表/结构体中。如果想要修改指针就必须泄露出异或的 key。</p>
+<h4 id="HeapPointerCheck"><a href="#HeapPointerCheck" class="headerlink" title="HeapPointerCheck"></a>HeapPointerCheck</h4><p>在 Add、Edit、Delete 功能中，程序会首先对堆地址进行 check。这个 check 最终我也没有绕过，看 writeup 上讲是因为 check 不严谨，多次尝试是有一定几率绕过的，糖果师傅也这样说。在 writeup 的评论中作者回复说可以通过将全局变量重写为无穷大进行绕过，但是我并没有想到办法去重写。</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><h4 id="x64-下-fastbins-的大小限制是？"><a href="#x64-下-fastbins-的大小限制是？" class="headerlink" title="x64 下 fastbins 的大小限制是？"></a>x64 下 fastbins 的大小限制是？</h4><p>这道题目最开始时我完全没有想到 fastbin，因为 Vuln 的结构体是 104，按照市面上大部分文章所讲，fastbin 的大小限制因该是 16-64，它是不属于其中的。但是实际调试过程中发现这个大小是与系统位数有关的，x64 下相应的限制应该是 32-128。</p>
+<h4 id="fastbins-真的不合并？"><a href="#fastbins-真的不合并？" class="headerlink" title="fastbins 真的不合并？"></a>fastbins 真的不合并？</h4><p>在写 exp 的过程中遇到了一个问题：泄露堆地址时如果先删除 Vuln0 再删除 Vuln1，会导致 fastbins 中的 chunk 合并，但是同样的在目前大家写的文章中都是说 fastbins 是不合并的。深究下发现了这篇文章：<a href="http://blog.chinaunix.net/uid-27767798-id-4107020.html" target="_blank" rel="external">ptmalloc中的fastbin chunk的合并过程</a> 解决了我的疑惑。这道题目中的情景是系统在 free 的 chunk 如果与 top chunk 相邻，那么当它与 top chunk 合并时系统回去尝试合并 fastbin 中的 chunk，减少碎片化。</p>
+<h2 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h2><p>直接贴 EXP 出来吧，思路通了结合注释还是比较容易理解的：<a href="https://gist.github.com/chuhades/73b1237c1429f384f980d7bb0328fa9c" target="_blank" rel="external">https://gist.github.com/chuhades/73b1237c1429f384f980d7bb0328fa9c</a><br>其实基本与 Drops 上面是一样的 :D</p>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><ul>
+<li><a href="http://drops.wooyun.org/binary/16257" target="_blank" rel="external">三个白帽-来 PWN 我一下好吗 writeup</a></li>
+<li><a href="http://fluxius.handgrep.se/2011/10/20/the-art-of-elf-analysises-and-exploitations/" target="_blank" rel="external">The Art Of ELF: Analysis and Exploitations</a></li>
+<li><a href="http://users.suse.com/~krahmer/relro.txt" target="_blank" rel="external">RELRO &amp; ASLR &amp; NX</a></li>
+<li><a href="http://www.cnblogs.com/wangaohui/p/5190889.html" target="_blank" rel="external">Malloc 碎碎念</a></li>
+<li><a href="http://blog.chinaunix.net/uid-27767798-id-4107020.html" target="_blank" rel="external">ptmalloc 中的 fastbin chunk 的合并过程</a></li>
+</ul>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a href="http://sh3ll.me/2016/06/28/baimao-vms/#disqus_thread" class="article-comment-link">Comments</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/07/04/ichunqiu-tenCentAp/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          ichunqiu tenCentAp - Pwn
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/05/15/review-pepper/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">[Review]ISG 2014 Final Pepper</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<section id="comments">
+  <div id="disqus_thread">
+    <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  </div>
+</section>
+</section>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Chu<br>
+      <a href="https://github.com/steven5538/hexo-theme-athena" target="_blank">Athena</a> by <a href="http://steven5538.tw" target="_blank">Steven5538</a> | Powered by <a href="http://hexo.io/" target="_blank">Hexo</a> | <script src="http://s11.cnzz.com/z_stat.php?id=1254610758&web_id=1254610758" language="JavaScript"></script>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+<script>
+  var disqus_shortname = 'sh3ll';
+  
+  var disqus_url = 'http://sh3ll.me/2016/06/28/baimao-vms/';
+  
+  (function(){
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//go.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+</script>
+
+
+<script src="http://libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+  </div>
+</body>
+</html>
